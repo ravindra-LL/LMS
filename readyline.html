@@ -159,6 +159,7 @@
   /* ---------- KPI row ---------- */
   .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
   .kpi{padding:16px 18px;}
+  button.kpi{font:inherit;color:inherit;width:100%;}
   .kpi .num{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.02em;}
   .kpi .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
 
@@ -308,7 +309,7 @@
 
 <div id="palette-overlay" class="overlay-scrim hidden">
   <div class="palette-box">
-    <input class="palette-input" id="palette-input" placeholder="Search paths, developers, standards…" oninput="renderPaletteResults()">
+    <input class="palette-input" id="palette-input" aria-label="Search paths, developers, standards" placeholder="Search paths, developers, standards…" oninput="renderPaletteResults()">
     <div class="palette-results" id="palette-results"></div>
   </div>
 </div>
@@ -340,16 +341,16 @@ const paths = {
     sopRef: 'backend-common-structure',
     version: 'v1.2',
     latestVersion: 'v1.2',
-    intro: 'How we structure NestJS services: rate limiting, pagination, validation, and error handling that client engineers can rely on without re-reading the source.',
+    intro: 'Simple rules for NestJS backends: pagination, rate limits, validation, and clear error messages — so any engineer can trust the code without re-reading it.',
     modules: [
       { id:'read', stage:'Reading', title:'Read the standard', status:'done',
-        core:'Every list endpoint must be paginated and rate-limited before it ships — no exceptions for "internal only" routes.',
-        body:'The standard covers four load-bearing patterns: cursor-or-offset pagination on every list route, a shared @Throttle guard applied per-route (not globally, which hides which routes actually need it), DTO validation with class-validator at the controller boundary, and typed error codes instead of generic 500s. Each pattern exists because of a specific incident — the rationale for all four is in the full SOP.',
+        core:'Every list endpoint must have paging and a rate limit before it ships. No exceptions, even for "internal only" routes.',
+        body:'Four simple rules: every list route must support page/limit, every route gets its own rate limit (not one shared limit for the whole app), every input is checked with a DTO before use, and every error returns a clear, typed code instead of a generic failure. Each rule exists because of a real past incident.',
         source:'backend-common-structure' },
       { id:'try', stage:'Try it', title:'Apply it to a sample route', status:'done',
-        body:'A short guided exercise: take an unpaginated /orders route and bring it into compliance — add page/limit params, a @Throttle decorator, and a typed error response for the downstream failure case. No grading here, just repetition.' },
+        body:'A short hands-on exercise: take a route with no paging, and fix it — add page/limit, add a rate limit, and return a clear error. Not graded, just practice.' },
       { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'pending',
-        body:'A simulated code review: read a controller diff and flag every statement about it that describes a real violation of the standard. This is graded — it is the signal a tech lead actually sees.' }
+        body:'A mini code review: read a real code diff and mark which lines break the rules above. This part is graded — it is what a tech lead actually sees.' }
     ]
   },
   frontend: {
@@ -357,14 +358,14 @@ const paths = {
     sopRef: 'frontend-common-structure',
     version: 'v2.0',
     latestVersion: 'v2.0',
-    intro: 'Next.js 15 project layout, API call conventions, auth handling, and the filtering/pagination patterns that keep client and server in sync.',
+    intro: 'How we build Next.js apps: file structure, API calls, login handling, and filters that always stay in sync with the backend.',
     modules: [
       { id:'read', stage:'Reading', title:'Read the standard', status:'pending',
-        core:'Every data-fetching component owns its loading, error, and empty states explicitly — no bare fetch calls in page components.',
-        body:'Covers the app-router route layout convention, the shared API client wrapper (which handles auth headers and 429 rate-limit surfacing automatically), and how filter/pagination state is kept in the URL rather than component state so it survives a refresh.',
+        core:'Every screen that loads data must clearly show a loading state, an error state, and an empty state — never a blank screen.',
+        body:'Covers where pages and components live, the shared API helper that already handles login tokens and "too many requests" errors, and why filters/pagination live in the page URL instead of hidden component state — so refreshing the page never loses your place.',
         source:'frontend-common-structure' },
-      { id:'try', stage:'Try it', title:'Apply it to a sample page', status:'locked', body:'Wire a listing page to the shared API client and move its filter state into the URL.' },
-      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'locked', body:'Not yet available — complete Reading and Try it first.' }
+      { id:'try', stage:'Try it', title:'Apply it to a sample page', status:'locked', body:'Connect a listing page to the shared API helper and move its filters into the URL.' },
+      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'locked', body:'Not available yet — finish Reading and Try it first.' }
     ]
   },
   security: {
@@ -372,74 +373,131 @@ const paths = {
     sopRef: 'secure-development',
     version: 'v1.4',
     latestVersion: 'v1.4',
-    intro: 'Application and cloud security practices: input handling, auth, secrets, and the IAM/network basics every client-facing engineer is expected to know.',
+    intro: 'The basic security rules every engineer should know: safe input handling, login security, secrets, and cloud access basics.',
     modules: [
       { id:'read', stage:'Reading', title:'Read the standard', status:'locked',
-        core:'Secrets never enter source control, CI logs, or client-visible payloads — including "temporary" debug output.',
-        body:'Covers input validation at trust boundaries, secret management via the platform vault (never .env committed), least-privilege IAM defaults, and the checklist used before any change touching auth or PII ships.',
+        core:'Passwords, keys, and tokens never go into code, logs, or anything a client can see — not even for a quick test.',
+        body:'Covers checking user input before using it, storing secrets in the team vault instead of a file, giving people only the cloud access they actually need, and the checklist to run before shipping anything that touches login or personal data.',
         source:'secure-development' },
-      { id:'try', stage:'Try it', title:'Apply it to a sample change', status:'locked', body:'Not yet available.' },
-      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'locked', body:'Not yet available.' }
+      { id:'try', stage:'Try it', title:'Apply it to a sample change', status:'locked', body:'Not available yet.' },
+      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'locked', body:'Not available yet.' }
     ]
+  },
+  comms: {
+    name: 'Client Communication',
+    sopRef: 'client-comms-playbook',
+    version: 'v1.0',
+    latestVersion: 'v1.0',
+    intro: 'How to talk to clients when things go wrong — in a way that builds trust instead of losing it.',
+    modules: [
+      { id:'read', stage:'Reading', title:'Read the standard', status:'not_started',
+        core:'Never give a client a date you have not checked with the team in the last hour. A wrong date costs more trust than a short delay in replying.',
+        body:'Covers how to respond to an upset client without over-promising, how to write a good status update (what changed, the new date, what we are doing differently), and when to bring in a lead instead of replying alone.',
+        source:'client-comms-playbook' },
+      { id:'try', stage:'Try it', title:'Draft a status update', status:'locked', body:'Not yet available — complete Reading first.' },
+      { id:'checkpoint', stage:'Checkpoint', title:'Pick the right response', status:'locked', body:'Not yet available — complete Reading and Try it first.' }
+    ],
+    checkpoint: {
+      type:'choice',
+      prompt:'A client messages you: "This has slipped three times already. I need to know today — can we hit Friday, or should I escalate to your manager?" Which reply follows the standard?',
+      options: [
+        { id:1, text:'"We\'ll do everything we can to hit Friday — I\'m confident the team can pull it off."', correct:false,
+          why:'This promises a date without checking it first. If Friday slips too, this reply is the reason the client stops trusting any date at all.' },
+        { id:2, text:'"I hear you. Let me check the real status with the team and reply by 3pm today with a straight answer, including a backup plan if Friday isn\'t possible."', correct:true,
+          why:'This is the right move: acknowledge the issue, give a specific time you will follow up, and promise a backup plan instead of a guess.' },
+        { id:3, text:'"Friday was always a tight estimate — this kind of delay is pretty normal for a project this size."', correct:false,
+          why:'Even if true, this sounds dismissive and blames the estimate instead of owning the update. It does not rebuild trust.' },
+      ]
+    }
   }
 };
 
+paths.backend.checkpoint = {
+  type:'violations',
+  statements: [
+    { id:1, text:'GET /orders reads straight from the database with no page or limit — it returns every single row every time.', violation:true,
+      hint:'Look at the database call. Is anything limiting how many rows come back?',
+      why:'This is the #1 issue the standard flags. A list route with no page/limit can slow down or crash once an account has enough data.' },
+    { id:2, text:'When the payment call fails, it retries 5 times right away with no wait in between.', violation:true,
+      hint:'Look at what happens right after the first failure — is there any pause before trying again?',
+      why:'Retrying instantly and repeatedly can turn one slow moment into a bigger outage by overloading a service that is already struggling.' },
+    { id:3, text:'The controller checks the incoming request with a DTO before using it.', violation:false,
+      hint:null,
+      why:'This is correct. Checking input with a DTO before using it is exactly what the standard asks for — not a violation.' },
+    { id:4, text:'The rate limit is applied to the POST /orders route, but not to the GET /orders route.', violation:true,
+      hint:'The rule is "every route that can be called repeatedly." Does applying it to only one route count?',
+      why:'Adding a rate limit to only one route is still a violation — the GET route is the one most likely to get hit repeatedly.' },
+    { id:5, text:'When the downstream service fails, the error is turned into a clear, documented error code before it reaches the caller.', violation:false,
+      hint:null,
+      why:'This is the correct pattern — a clear, typed error code instead of a generic failure. Not a violation.' },
+  ]
+};
+
 const devs = [
-  { name:'Jordan Blake',    backend:'pending',     frontend:'not_started', security:'not_started' },
-  { name:'Amara Osei',      backend:'done',        frontend:'done',        security:'pending' },
-  { name:'Priya Nair',      backend:'stale',       frontend:'done',        security:'not_started' },
-  { name:'Sam Whitfield',   backend:'done',        frontend:'not_started', security:'not_started' },
-  { name:'Ken Ibarra',      backend:'not_started', frontend:'not_started', security:'done' },
-  { name:'Lena Kowalski',   backend:'done',        frontend:'pending',     security:'done' },
+  { name:'Rohan Mehta',     backend:'pending',     frontend:'not_started', security:'not_started', comms:'not_started' },
+  { name:'Ananya Iyer',     backend:'done',        frontend:'done',        security:'pending',     comms:'pending' },
+  { name:'Priya Nair',      backend:'stale',       frontend:'done',        security:'not_started', comms:'not_started' },
+  { name:'Sanjay Kapoor',   backend:'done',        frontend:'not_started', security:'not_started', comms:'not_started' },
+  { name:'Karan Bhatia',    backend:'not_started', frontend:'not_started', security:'done',        comms:'done' },
+  { name:'Lakshmi Menon',   backend:'done',        frontend:'pending',     security:'done',        comms:'pending' },
 ];
+
+const projects = ['Kirana Retail Platform', 'Arogya Health Portal', 'Transys Logistics API', 'Meghdata Warehouse'];
+
+const assignments = [
+  { dev:'Ananya Iyer', project:'Kirana Retail Platform', pathKey:'backend', by:'Vikram Rao', ts:'20 Aug 2026, 2:00 PM IST' },
+];
+
+const checkpointAttempts = {
+  'Ananya Iyer|backend':   [ { ts:'20 Aug 2026, 10:12 AM IST', result:'pass', hints:0 } ],
+  'Priya Nair|backend':    [ { ts:'18 Aug 2026, 2:05 PM IST',  result:'pass', hints:1 } ],
+  'Sanjay Kapoor|backend': [ { ts:'19 Aug 2026, 4:30 PM IST',  result:'pass', hints:2 } ],
+};
 
 const overrides = {}; // "<devName>|<pathKey>" -> {note, by}
 
 const changelog = [
-  { pathKey:'backend', version:'v1.1', date:'2026-06-02', notes:'Added the requirement that rate-limit guards be applied per-route rather than globally.', affected:2 },
-  { pathKey:'frontend', version:'v2.0', date:'2026-07-14', notes:'Moved filter/pagination state guidance to require URL state instead of component state.', affected:1 },
+  { pathKey:'backend', version:'v1.1', date:'2 Jun 2026', notes:'Rate limits now apply per route instead of one shared limit for the whole app.', affected:2, affectedNames:['Priya Nair','Sanjay Kapoor'] },
+  { pathKey:'frontend', version:'v2.0', date:'14 Jul 2026', notes:'Filters and pagination must now live in the page URL instead of hidden component state.', affected:1, affectedNames:['Ananya Iyer'] },
 ];
 
 const activityLog = [
-  { ts:'Aug 25, 4:12 PM', actor:'Rae Chen', text:'published <b>Frontend Standards v2.0</b>', icon:'layers', tone:'accent' },
-  { ts:'Aug 25, 11:03 AM', actor:'Amara Osei', text:'was verified on <b>Backend Standards</b>', icon:'check', tone:'green' },
-  { ts:'Aug 24, 3:40 PM', actor:'Dee Fernandes', text:'overrode Priya Nair on <b>Backend Standards</b>', icon:'info', tone:'amber' },
-  { ts:'Aug 22, 9:15 AM', actor:'Priya Nair', text:'was flagged stale on <b>Backend Standards</b>', icon:'alert', tone:'red' },
+  { ts:'25 Aug 2026, 4:12 PM IST', actor:'Kavya Reddy', text:'published <b>Frontend Standards v2.0</b>', icon:'layers', tone:'accent', read:true, link:{type:'changelog', pathKey:'frontend', version:'v2.0'} },
+  { ts:'25 Aug 2026, 11:03 AM IST', actor:'Ananya Iyer', text:'was verified on <b>Backend Standards</b>', icon:'check', tone:'green', read:true, link:{type:'dev-path', dev:'Ananya Iyer', pathKey:'backend'} },
+  { ts:'24 Aug 2026, 3:40 PM IST', actor:'Vikram Rao', text:'overrode Priya Nair on <b>Backend Standards</b>', icon:'info', tone:'amber', read:true, link:{type:'dev-path', dev:'Priya Nair', pathKey:'backend'} },
+  { ts:'22 Aug 2026, 9:15 AM IST', actor:'Priya Nair', text:'was flagged stale on <b>Backend Standards</b>', icon:'alert', tone:'red', read:true, link:{type:'dev-path', dev:'Priya Nair', pathKey:'backend'} },
 ];
-
-const checkpointStatements = [
-  { id:1, text:'The GET /orders controller queries the database directly with no page or limit parameter, returning every matching row.', violation:true,
-    hint:'Check the query builder call before it reaches the database — is anything bounding the result set?',
-    why:'Unbounded list endpoints are the standard’s #1 flagged issue — every list route must accept and enforce page/limit, or a large account can take down the query.' },
-  { id:2, text:'When the payment gateway call fails, the handler retries up to 5 times immediately with no backoff between attempts.', violation:true,
-    hint:'Look at how the retry loop is triggered and what (if anything) happens between attempts.',
-    why:'Retrying without exponential backoff can turn a brief downstream blip into a self-inflicted outage by hammering a service that’s already struggling.' },
-  { id:3, text:'The controller validates the incoming request body with a DTO decorated using class-validator before processing it.', violation:false,
-    hint:null,
-    why:'This is correct as written — DTO validation at the controller boundary is exactly what the standard requires. Not a violation.' },
-  { id:4, text:'The shared @Throttle rate-limit guard is applied to the POST /orders route, but not to the GET /orders list route.', violation:true,
-    hint:'The standard requires rate limiting on every route that can be hit repeatedly — does "some routes" satisfy that?',
-    why:'Partial application of the guard is still a violation — an unthrottled list route is exactly the kind of route most likely to be hit repeatedly by a runaway client.' },
-  { id:5, text:'Errors returned by the downstream service are caught and mapped to a typed, documented error code before being sent to the caller.', violation:false,
-    hint:null,
-    why:'This is the compliant pattern — typed error codes instead of a generic 500. Not a violation.' },
-];
+function nowLabel(){
+  const d = new Date();
+  const date = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
+  const time = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'Asia/Kolkata'});
+  return date + ', ' + time + ' IST';
+}
+function recordAttempt(devName, pathKey, result, hints){
+  const key = devName+'|'+pathKey;
+  if(!checkpointAttempts[key]) checkpointAttempts[key] = [];
+  checkpointAttempts[key].unshift({ ts:nowLabel(), result, hints });
+}
 
 /* ============ STATE ============ */
 const state = {
   role: 'learner',            // 'learner' | 'lead' | 'platform'
   screen: 'l-dashboard',      // current screen id
   activePathKey: null,        // for l-path / l-checkpoint
-  selected: new Set(),        // selected checkpoint statement ids
+  selected: new Set(),        // selected checkpoint statement ids (violations-type)
+  choiceSelected: null,       // selected option id (choice-type)
   submitted: false,
   hintsShown: new Set(),
-  drawer: null,               // {type:'lead-cell', dev, pathKey} | {type:'platform-publish', pathKey}
+  drawer: null,               // {type:'lead-cell'|'platform-publish'|'changelog-detail', ...}
+  bellOpen: false,
+  profileTarget: null,        // dev/persona name shown on the 'profile' screen
+  leadFilter: null,           // null | 'verified' | 'stale' | 'notready'
 };
 
 const USERS = {
-  learner:  { name:'Jordan Blake',   title:'Learner' },
-  lead:     { name:'Dee Fernandes',  title:'Tech Lead' },
-  platform: { name:'Rae Chen',       title:'Platform Lead' },
+  learner:  { name:'Rohan Mehta',   title:'Learner' },
+  lead:     { name:'Vikram Rao',    title:'Tech Lead' },
+  platform: { name:'Kavya Reddy',   title:'Platform Lead' },
 };
 
 const AVATAR_PALETTE = ['#2E56E8','#7C3AED','#0F9D8C','#D9770D','#C2418F','#3D7A2E','#B5401E'];
@@ -472,34 +530,51 @@ function effectiveDevStatus(dev, pathKey){
   return dev[pathKey];
 }
 
-/* ============ ACTIVITY LOG ============ */
-function pushActivity(actor, text, icon, tone){
-  activityLog.unshift({ ts:'Just now', actor, text, icon, tone });
-  document.querySelectorAll('.activity-rail').forEach(renderActivityRailInto);
-  updateBell();
+/* ============ ACTIVITY LOG / NOTIFICATIONS ============ */
+// activityLog doubles as the notification inbox: every entry optionally carries
+// a `link` describing where it should deep-link to, and a `read` flag.
+function pushActivity(actor, text, icon, tone, link){
+  activityLog.unshift({ ts:nowLabel(), actor, text, icon, tone, read:false, link: link || null });
+}
+function notificationRow(a, idx){
+  const clickable = !!a.link;
+  return (
+    '<div class="activity-item" '+(clickable?'style="cursor:pointer;" onclick="goToActivity('+idx+')"':'')+'>' +
+      '<span class="activity-icon '+a.tone+'">'+ic(a.icon)+'</span>' +
+      '<div><div class="activity-text">'+(!a.read?'<span style="color:var(--accent);">●&nbsp;</span>':'')+'<b>'+a.actor+'</b> '+a.text+'</div><div class="activity-ts">'+a.ts+'</div></div>' +
+    '</div>'
+  );
 }
 function renderActivityRailInto(container){
   container.innerHTML =
     '<div class="rail-title">Activity</div>' +
-    activityLog.slice(0,12).map(a =>
-      '<div class="activity-item">' +
-        '<span class="activity-icon '+a.tone+'">'+ic(a.icon)+'</span>' +
-        '<div><div class="activity-text"><b>'+a.actor+'</b> '+a.text+'</div><div class="activity-ts">'+a.ts+'</div></div>' +
-      '</div>'
-    ).join('');
+    activityLog.slice(0,8).map((a,i) => notificationRow(a,i)).join('');
 }
 function activityRailHTML(){ return '<div class="panel rail-panel activity-rail"></div>'; }
-function updateBell(){
-  const bell = document.getElementById('bell');
-  if(!bell) return;
-  const recentBad = activityLog[0] && activityLog[0].tone === 'red';
-  bell.classList.toggle('lit', !!recentBad);
-  bell.innerHTML = ic('alert','lg') + (recentBad ? '<span class="dot"></span>' : '');
+function markAllRead(){
+  activityLog.forEach(a => a.read = true);
+  render();
 }
-function showLatestActivity(){
-  const a = activityLog[0];
+function goToActivity(idx){
+  const a = activityLog[idx];
   if(!a) return;
-  alert(a.actor + ' ' + a.text.replace(/<\/?b>/g,'') + ' — ' + a.ts);
+  a.read = true;
+  state.bellOpen = false;
+  const link = a.link;
+  if(!link){ render(); return; }
+  if(link.type === 'dev-path'){
+    switchRole('lead');
+    openLeadDrawer(link.dev, link.pathKey);
+  } else if(link.type === 'path'){
+    switchRole('learner');
+    navigate('l-path', link.pathKey);
+  } else if(link.type === 'changelog'){
+    switchRole('platform');
+    const i = changelog.findIndex(c => c.pathKey===link.pathKey && c.version===link.version);
+    if(i > -1) openChangelogDrawer(i);
+  } else {
+    render();
+  }
 }
 
 /* ============ NAV / RENDER DISPATCH ============ */
@@ -513,8 +588,15 @@ function navigate(screen, pathKey){
   state.screen = screen;
   state.activePathKey = pathKey || null;
   state.selected = new Set();
+  state.choiceSelected = null;
   state.submitted = false;
   state.hintsShown = new Set();
+  render();
+}
+function openProfile(name){
+  state.screen = 'profile';
+  state.profileTarget = name;
+  state.bellOpen = false;
   render();
 }
 function render(){
@@ -526,14 +608,16 @@ function render(){
   else if(state.screen === 'l-checkpoint') root.innerHTML = screenLearnerCheckpoint(state.activePathKey);
   else if(state.screen === 'app-lead'){ root.innerHTML = screenLead(); renderLeadMatrix(); }
   else if(state.screen === 'app-platform') root.innerHTML = screenPlatform();
+  else if(state.screen === 'profile') root.innerHTML = screenProfile(state.profileTarget);
+  else if(state.screen === 'notifications') root.innerHTML = screenNotifications();
   document.querySelectorAll('.activity-rail').forEach(renderActivityRailInto);
-  updateBell();
   renderDrawer();
 }
 
 function renderSidebar(){
   const el = document.getElementById('sidebar');
   const user = USERS[state.role];
+  const unread = activityLog.filter(a=>!a.read).length;
   let nav = '';
   if(state.role === 'learner'){
     nav =
@@ -548,19 +632,28 @@ function renderSidebar(){
   } else {
     nav = navGroup('Overview', [ navItem('layers','Standards', state.screen==='app-platform', "navigate('app-platform')") ]);
   }
+  nav += navGroup('You', [
+    navItemBadge('alert','Notifications', state.screen==='notifications', "navigate('notifications')", unread),
+    navItem('dot','My Profile', state.screen==='profile' && state.profileTarget===user.name, "openProfile('"+user.name+"')")
+  ]);
   el.innerHTML =
     '<div class="brand"><div class="brand-mark">R</div><div><div class="brand-name">Readyline</div><div class="brand-sub">Linearloop</div></div></div>' +
     '<button class="palette-trigger" onclick="openPalette()">'+ic('search')+'<span>Search…</span><kbd>/</kbd></button>' +
     nav +
     '<div class="role-switch">' +
-      roleBtn('learner','Jordan Blake','Learner') +
-      roleBtn('lead','Dee Fernandes','Tech Lead') +
-      roleBtn('platform','Rae Chen','Platform Lead') +
+      roleBtn('learner','Rohan Mehta','Learner') +
+      roleBtn('lead','Vikram Rao','Tech Lead') +
+      roleBtn('platform','Kavya Reddy','Platform Lead') +
     '</div>';
 }
 function pathIconFor(k){ return k==='security' ? 'lock' : 'layers'; }
 function navGroup(label, items){ return '<div class="nav-group"><div class="nav-label">'+label+'</div>'+items.join('')+'</div>'; }
 function navItem(icon,label,active,onclick){ return '<button class="nav-item '+(active?'active':'')+'" onclick="'+onclick+'">'+ic(icon)+'<span>'+label+'</span></button>'; }
+function navItemBadge(icon,label,active,onclick,count){
+  return '<button class="nav-item '+(active?'active':'')+'" onclick="'+onclick+'">'+ic(icon)+'<span style="flex:1;">'+label+'</span>'+
+    (count>0 ? '<span style="background:var(--red-ink);color:#fff;border-radius:99px;font-family:var(--mono);font-size:10px;padding:1px 6px;">'+count+'</span>' : '') +
+    '</button>';
+}
 function roleBtn(role,name,title){
   const active = state.role===role;
   return '<button class="role-btn '+(active?'active':'')+'" onclick="switchRole(\''+role+'\')">'+avatar(name,'sm')+
@@ -576,29 +669,56 @@ function renderTopstrip(){
   else if(state.screen==='l-checkpoint') crumb = 'Dashboard / '+paths[state.activePathKey].name+' / <b>Checkpoint</b>';
   else if(state.screen==='app-lead') crumb = '<b>Team Readiness</b>';
   else if(state.screen==='app-platform') crumb = '<b>Standards</b>';
+  else if(state.screen==='profile') crumb = '<b>Profile</b> · '+state.profileTarget;
+  else if(state.screen==='notifications') crumb = '<b>Notifications</b>';
+  const unread = activityLog.filter(a=>!a.read);
+  const hasBadUnread = unread.some(a=>a.tone==='red');
   el.innerHTML =
     '<div class="breadcrumb">'+crumb+'</div>' +
     '<div style="display:flex;align-items:center;gap:14px;">' +
-      '<button class="bell" id="bell" onclick="showLatestActivity()"></button>' +
-      avatar(user.name,'sm') +
+      '<div class="bell-wrap" style="position:relative;">' +
+        '<button class="bell '+(hasBadUnread?'lit':'')+'" id="bell" onclick="toggleBell(event)">'+ic('alert','lg')+(unread.length>0?'<span class="dot"></span>':'')+'</button>' +
+        (state.bellOpen ? bellDropdownHTML() : '') +
+      '</div>' +
+      '<span style="cursor:pointer;" onclick="openProfile(\''+user.name+'\')">'+avatar(user.name,'sm')+'</span>' +
     '</div>';
 }
+function toggleBell(e){
+  if(e) e.stopPropagation();
+  state.bellOpen = !state.bellOpen;
+  renderTopstrip();
+}
+function bellDropdownHTML(){
+  return (
+    '<div class="panel" style="position:absolute;top:40px;right:0;width:320px;box-shadow:var(--sh-lg);z-index:40;padding:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px 8px;">' +
+        '<span class="rail-title" style="margin:0;">Notifications</span>' +
+        '<button class="btn ghost sm" onclick="markAllRead()">Mark all read</button>' +
+      '</div>' +
+      (activityLog.length ? activityLog.slice(0,6).map((a,i)=>notificationRow(a,i)).join('') : '<div style="font-size:12.5px;color:var(--ink-faint);padding:6px;">Nothing yet.</div>') +
+      '<button class="btn ghost sm" style="width:100%;justify-content:center;margin-top:6px;" onclick="state.bellOpen=false;navigate(\'notifications\')">View all</button>' +
+    '</div>'
+  );
+}
+document.addEventListener('click', function(e){
+  if(state.bellOpen && !e.target.closest('.bell-wrap')){ state.bellOpen = false; renderTopstrip(); }
+});
 
 /* ============ LEARNER: DASHBOARD ============ */
 function priorityRank(status){ return status==='stale' ? 0 : status==='pending' ? 1 : status==='not_started' ? 2 : 3; }
 function screenLearnerDashboard(){
-  const jordan = devs.find(d=>d.name==='Jordan Blake');
-  const ranked = Object.keys(paths).slice().sort((a,b)=> priorityRank(jordan[a]) - priorityRank(jordan[b]));
+  const rohan = devs.find(d=>d.name==='Rohan Mehta');
+  const ranked = Object.keys(paths).slice().sort((a,b)=> priorityRank(rohan[a]) - priorityRank(rohan[b]));
   const heroKey = ranked[0];
   const heroPath = paths[heroKey];
-  const heroStatus = jordan[heroKey];
+  const heroStatus = rohan[heroKey];
   const rest = ranked.slice(1);
   const heroActionLabel = heroStatus==='stale' ? 'Re-verify' : heroStatus==='not_started' ? 'Start path' : 'Continue';
 
   return (
     '<div class="eyebrow">Welcome back</div>' +
-    '<h1 class="page-title">Jordan Blake</h1>' +
-    '<p class="page-sub">One path is worth acting on right now — everything else can wait.</p>' +
+    '<h1 class="page-title">Rohan Mehta</h1>' +
+    '<p class="page-sub">Start with this one path. The rest can wait.</p>' +
     '<div class="content-grid" style="margin-top:22px;">' +
       '<div>' +
         '<div class="dark-card hero">' +
@@ -612,7 +732,7 @@ function screenLearnerDashboard(){
         '</div>' +
         '<div class="row-list">' +
           rest.map(k => {
-            const p = paths[k], st = jordan[k];
+            const p = paths[k], st = rohan[k];
             return '<div class="panel path-row" onclick="navigate(\'l-path\',\''+k+'\')" style="cursor:pointer;">' +
               avatar(p.name,'sm') +
               '<div><div class="name">'+p.name+'</div><div class="sub">'+p.sopRef+' · '+p.version+'</div></div>' +
@@ -638,7 +758,7 @@ function screenLearnerPath(key){
     '<div class="eyebrow">Path</div>' +
     '<h1 class="page-title">'+p.name+'</h1>' +
     '<p class="page-sub">'+p.intro+'</p>' +
-    (stale ? '<div class="chip red" style="margin-top:10px;">'+ic('alert')+'Standard updated to '+p.latestVersion+' — your verification (against '+p.version+') is stale</div>' : '') +
+    (stale ? '<div class="chip red" style="margin-top:10px;">'+ic('alert')+'This standard changed to '+p.latestVersion+'. Your check (done on '+p.version+') is now out of date.</div>' : '') +
     stepper(p) +
     '<div class="content-grid single">' +
       '<div>' + p.modules.map(m => accordionItem(key, m)).join('') + '</div>' +
@@ -688,11 +808,14 @@ function toggleWhy(btn){
 /* ============ LEARNER: CHECKPOINT ============ */
 function screenLearnerCheckpoint(key){
   const p = paths[key];
+  return p.checkpoint.type === 'choice' ? screenChoiceCheckpoint(key, p) : screenViolationsCheckpoint(key, p);
+}
+function screenViolationsCheckpoint(key, p){
   const disabled = state.submitted;
   return (
     '<div class="eyebrow">Checkpoint · '+p.name+'</div>' +
     '<h1 class="page-title">Review this PR diff</h1>' +
-    '<p class="page-sub">Flag every statement below that describes a real violation of the standard. Select exactly the violations — nothing more, nothing less.</p>' +
+    '<p class="page-sub">Mark every line below that breaks a rule. Pick only the real violations — no more, no less.</p>' +
     '<div class="terminal" style="margin:20px 0;">' +
       '<div class="terminal-bar"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-file">orders.controller.ts</span></div>' +
       '<div class="terminal-body">' +
@@ -715,10 +838,53 @@ function screenLearnerCheckpoint(key){
 '<span class="ln">17</span>}' +
       '</div>' +
     '</div>' +
-    '<div>' + checkpointStatements.map(s => statementItem(s, disabled)).join('') + '</div>' +
+    '<div>' + p.checkpoint.statements.map(s => statementItem(s, disabled)).join('') + '</div>' +
     (disabled ? resultBanner() : '<button class="btn primary" style="margin-top:8px;" onclick="submitCheckpoint(\''+key+'\')" '+(state.selected.size===0?'disabled':'')+'>Submit review '+ic('arrowRight')+'</button>') +
     (disabled ? '<div style="margin-top:16px;display:flex;gap:10px;"><button class="btn" onclick="retryCheckpoint(\''+key+'\')">Try again</button><button class="btn ghost" onclick="navigate(\'l-path\',\''+key+'\')">Back to path</button></div>' : '')
   );
+}
+function screenChoiceCheckpoint(key, p){
+  const disabled = state.submitted;
+  const cp = p.checkpoint;
+  return (
+    '<div class="eyebrow">Checkpoint · '+p.name+'</div>' +
+    '<h1 class="page-title">Pick the right response</h1>' +
+    '<p class="page-sub">Pick the reply that follows the standard. Only one is correct.</p>' +
+    '<div class="panel" style="padding:18px 20px;margin:20px 0;font-size:14px;line-height:1.6;">'+cp.prompt+'</div>' +
+    '<div>' + cp.options.map(o => choiceItem(o, disabled)).join('') + '</div>' +
+    (disabled ? resultBanner() : '<button class="btn primary" style="margin-top:8px;" onclick="submitChoiceCheckpoint(\''+key+'\')" '+(state.choiceSelected==null?'disabled':'')+'>Submit answer '+ic('arrowRight')+'</button>') +
+    (disabled ? '<div style="margin-top:16px;display:flex;gap:10px;"><button class="btn" onclick="retryCheckpoint(\''+key+'\')">Try again</button><button class="btn ghost" onclick="navigate(\'l-path\',\''+key+'\')">Back to path</button></div>' : '')
+  );
+}
+function choiceItem(o, disabled){
+  const checked = state.choiceSelected === o.id;
+  let cls = '';
+  if(disabled){ cls = o.correct ? 'correct' : (checked ? 'incorrect' : ''); }
+  else if(checked){ cls = 'flagged'; }
+  return (
+    '<div class="statement '+cls+'">' +
+      '<input type="radio" name="choice" '+(checked?'checked':'')+' '+(disabled?'disabled':'')+' onchange="selectChoice('+o.id+')">' +
+      '<div class="text">' + o.text + (disabled ? '<div class="why">'+(o.correct?ic('check'):ic('x'))+' '+o.why+'</div>' : '') + '</div>' +
+    '</div>'
+  );
+}
+function selectChoice(id){ state.choiceSelected = id; render(); }
+function submitChoiceCheckpoint(pathKey){
+  state.submitted = true;
+  const p = paths[pathKey];
+  const opt = p.checkpoint.options.find(o=>o.id===state.choiceSelected);
+  const pass = !!(opt && opt.correct);
+  state.lastPass = pass;
+  const rohan = devs.find(d=>d.name==='Rohan Mehta');
+  if(pass){
+    p.modules.forEach(m => m.status = 'done');
+    rohan[pathKey] = 'done';
+    pushActivity('Rohan Mehta', 'passed the checkpoint on <b>'+p.name+'</b>', 'check', 'green', {type:'path', pathKey});
+  } else {
+    pushActivity('Rohan Mehta', 'submitted a checkpoint attempt on <b>'+p.name+'</b> — not yet passing', 'alert', 'amber', {type:'path', pathKey});
+  }
+  recordAttempt('Rohan Mehta', pathKey, pass?'pass':'fail', 0);
+  render();
 }
 function statementItem(s, disabled){
   const checked = state.selected.has(s.id);
@@ -746,23 +912,26 @@ function toggleStatement(id){
 function showHint(id){ state.hintsShown.add(id); render(); }
 function submitCheckpoint(pathKey){
   state.submitted = true;
-  const violations = new Set(checkpointStatements.filter(s=>s.violation).map(s=>s.id));
+  const p = paths[pathKey];
+  const statements = p.checkpoint.statements;
+  const violations = new Set(statements.filter(s=>s.violation).map(s=>s.id));
   const pass = violations.size === state.selected.size && [...violations].every(id => state.selected.has(id));
   state.lastPass = pass;
-  const jordan = devs.find(d=>d.name==='Jordan Blake');
-  const p = paths[pathKey];
+  const rohan = devs.find(d=>d.name==='Rohan Mehta');
   if(pass){
     p.modules.forEach(m => m.status = 'done');
-    jordan[pathKey] = 'done';
-    pushActivity('Jordan Blake', 'passed the checkpoint on <b>'+p.name+'</b>', 'check', 'green');
+    rohan[pathKey] = 'done';
+    pushActivity('Rohan Mehta', 'passed the checkpoint on <b>'+p.name+'</b>', 'check', 'green', {type:'path', pathKey});
   } else {
-    pushActivity('Jordan Blake', 'submitted a checkpoint attempt on <b>'+p.name+'</b> — not yet passing', 'alert', 'amber');
+    pushActivity('Rohan Mehta', 'submitted a checkpoint attempt on <b>'+p.name+'</b> — not yet passing', 'alert', 'amber', {type:'path', pathKey});
   }
+  recordAttempt('Rohan Mehta', pathKey, pass?'pass':'fail', state.hintsShown.size);
   render();
 }
 function retryCheckpoint(pathKey){
   state.submitted = false;
   state.selected = new Set();
+  state.choiceSelected = null;
   state.hintsShown = new Set();
   render();
 }
@@ -770,6 +939,78 @@ function resultBanner(){
   return state.lastPass
     ? '<div class="chip green" style="font-size:13px;padding:8px 14px;">'+ic('check')+'Passed — this path is now verified.</div>'
     : '<div class="chip red" style="font-size:13px;padding:8px 14px;">'+ic('x')+'Not yet — review the feedback below and try again.</div>';
+}
+
+/* ============ PROFILE ============ */
+function screenProfile(name){
+  const dev = devs.find(d=>d.name===name);
+  if(dev) return screenDevProfile(dev);
+  const actions = activityLog.filter(a=>a.actor===name);
+  const roleEntry = Object.values(USERS).find(u=>u.name===name);
+  return (
+    '<div class="eyebrow">Profile</div>' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:6px;">'+avatar(name,'lg')+'<h1 class="page-title">'+name+'</h1></div>' +
+    '<p class="page-sub">'+(roleEntry?roleEntry.title:'')+'</p>' +
+    '<div class="panel" style="padding:18px 20px;margin-top:20px;">' +
+      '<div class="rail-title" style="margin-bottom:6px;">Recent actions</div>' +
+      (actions.length ? actions.map(a=>'<div class="changelog-item"><div class="top"><span>'+a.text.replace(/<\/?b>/g,'')+'</span><span>'+a.ts+'</span></div></div>').join('') : '<div style="font-size:13px;color:var(--ink-faint);">No actions yet.</div>') +
+    '</div>'
+  );
+}
+function screenDevProfile(dev){
+  const pathKeys = Object.keys(paths);
+  const doneCount = pathKeys.filter(k=>effectiveDevStatus(dev,k)==='done').length;
+  const staleCount = pathKeys.filter(k=>effectiveDevStatus(dev,k)==='stale').length;
+  const notReadyCount = pathKeys.length - doneCount - staleCount;
+  const devAssignments = assignments.filter(a=>a.dev===dev.name);
+  return (
+    '<div class="eyebrow">Profile</div>' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:6px;">'+avatar(dev.name,'lg')+'<h1 class="page-title">'+dev.name+'</h1></div>' +
+    '<p class="page-sub">How ready this person is for client work, path by path.</p>' +
+    '<div class="kpi-row" style="margin-top:20px;">' +
+      kpi(doneCount,'Verified') + kpi(staleCount,'Stale') + kpi(notReadyCount,'Not yet ready') + kpi(devAssignments.length,'Assignments') +
+    '</div>' +
+    '<div class="content-grid single">' +
+      '<div>' +
+        pathKeys.map(k=>profilePathCard(dev,k)).join('') +
+        (devAssignments.length ? (
+          '<div class="panel" style="padding:18px 20px;margin-top:6px;">' +
+            '<div class="rail-title" style="margin-bottom:6px;">Assignment history</div>' +
+            devAssignments.map(a=>'<div class="changelog-item"><div class="top"><span>'+a.project+' · '+paths[a.pathKey].name+'</span><span>'+a.ts+'</span></div><div class="notes">assigned by '+a.by+'</div></div>').join('') +
+          '</div>'
+        ) : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+function profilePathCard(dev, k){
+  const p = paths[k];
+  const status = effectiveDevStatus(dev,k);
+  const ov = overrides[dev.name+'|'+k];
+  const attempts = checkpointAttempts[dev.name+'|'+k] || [];
+  return (
+    '<div class="panel" style="padding:16px 18px;margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-weight:600;font-size:13.5px;">'+p.name+'</div>'+statusChip(status)+'</div>' +
+      '<div class="mono" style="font-size:11.5px;color:var(--ink-faint);margin-top:4px;">verified against '+p.version+(p.version!==p.latestVersion?' · latest '+p.latestVersion:'')+'</div>' +
+      (ov ? '<div class="chip accent" style="margin-top:8px;">override by '+ov.by+': '+ov.note+'</div>' : '') +
+      (attempts.length ? '<div style="margin-top:10px;">' + attempts.map(a=>
+        '<div style="font-size:12.5px;padding:6px 0;border-top:1px dashed var(--border);">'+(a.result==='pass'?ic('check'):ic('x'))+' '+(a.result==='pass'?'Passed':'Attempted')+' checkpoint · '+a.ts+(a.hints?' · '+a.hints+' hint(s) used':'')+'</div>'
+      ).join('') + '</div>' : '') +
+    '</div>'
+  );
+}
+
+/* ============ NOTIFICATIONS ============ */
+function screenNotifications(){
+  return (
+    '<div class="eyebrow">Inbox</div>' +
+    '<h1 class="page-title">Notifications</h1>' +
+    '<p class="page-sub">Everything that happened, in one place. Tap anything to open it.</p>' +
+    '<div style="margin:16px 0;"><button class="btn sm" onclick="markAllRead()">Mark all read</button></div>' +
+    '<div class="panel" style="padding:6px 20px;">' +
+      (activityLog.length ? activityLog.map((a,i)=>notificationRow(a,i)).join('') : '<div style="font-size:13px;color:var(--ink-faint);padding:14px 0;">Nothing yet.</div>') +
+    '</div>'
+  );
 }
 
 /* ============ TECH LEAD ============ */
@@ -785,30 +1026,62 @@ function screenLead(){
   return (
     '<div class="eyebrow">Tech Lead</div>' +
     '<h1 class="page-title">Team Readiness</h1>' +
-    '<p class="page-sub">Who is actually safe to staff, and against which version of the standard.</p>' +
+    '<p class="page-sub">See who is ready for client work, and against which version of the standard. Tap a number below to filter the list.</p>' +
     '<div class="kpi-row" style="margin-top:20px;">' +
-      kpi(readiness+'%','Team readiness') + kpi(done,'Verified') + kpi(stale,'Stale') + kpi(pending+notStarted,'Not yet ready') +
+      kpiBtn(readiness+'%','Team readiness', null, state.leadFilter===null) +
+      kpiBtn(done,'Verified', 'verified', state.leadFilter==='verified') +
+      kpiBtn(stale,'Stale', 'stale', state.leadFilter==='stale') +
+      kpiBtn(pending+notStarted,'Not yet ready', 'notready', state.leadFilter==='notready') +
     '</div>' +
     '<div class="content-grid">' +
       '<div class="panel raised" style="padding:18px 20px;">' +
-        '<div class="matrix-controls"><input class="search-input" id="lead-search" placeholder="Filter by developer name…" oninput="renderLeadMatrix()"></div>' +
+        '<div class="matrix-controls"><input class="search-input" id="lead-search" aria-label="Filter by developer name" placeholder="Filter by developer name…" oninput="renderLeadMatrix()"></div>' +
         '<div id="lead-matrix"></div>' +
       '</div>' +
       activityRailHTML() +
+    '</div>' +
+    '<div class="panel" style="padding:18px 20px;margin-top:20px;">' +
+      '<div class="rail-title" style="margin-bottom:6px;">Recent assignments</div>' +
+      (assignments.length ? assignments.slice(0,6).map(a =>
+        '<div class="changelog-item" style="cursor:pointer;" onclick="openLeadDrawer(\''+a.dev+'\',\''+a.pathKey+'\')">' +
+          '<div class="top"><span>'+a.dev+' → '+a.project+'</span><span>'+a.ts+'</span></div>' +
+          '<div class="notes">using '+paths[a.pathKey].name+' status · assigned by '+a.by+'</div>' +
+        '</div>'
+      ).join('') : '<div style="font-size:13px;color:var(--ink-faint);">No assignments yet.</div>') +
     '</div>'
   );
 }
 function kpi(num,lbl){ return '<div class="panel kpi"><div class="num">'+num+'</div><div class="lbl">'+lbl+'</div></div>'; }
+function kpiBtn(num,lbl,filter,active){
+  return '<button class="panel kpi" style="text-align:left;cursor:pointer;'+(active?'border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);':'')+'" onclick="setLeadFilter('+(filter?"'"+filter+"'":'null')+')"><div class="num">'+num+'</div><div class="lbl">'+lbl+'</div></button>';
+}
+function setLeadFilter(f){ state.leadFilter = f; render(); }
+function leadFilterMatches(status, filter){
+  if(!filter) return true;
+  if(filter==='verified') return status==='done';
+  if(filter==='stale') return status==='stale';
+  return status==='pending' || status==='not_started';
+}
+function leadFilterLabel(f){
+  if(f==='verified') return 'Verified';
+  if(f==='stale') return 'Stale';
+  return 'Not yet ready';
+}
 function renderLeadMatrix(){
   const host = document.getElementById('lead-matrix');
   if(!host) return;
   const q = (document.getElementById('lead-search')||{}).value || '';
-  const filtered = devs.filter(d => d.name.toLowerCase().includes(q.toLowerCase()));
   const pathKeys = Object.keys(paths);
+  const filtered = devs.filter(d =>
+    d.name.toLowerCase().includes(q.toLowerCase()) &&
+    (!state.leadFilter || pathKeys.some(k => leadFilterMatches(effectiveDevStatus(d,k), state.leadFilter)))
+  );
   host.innerHTML =
+    (state.leadFilter ? '<div class="chip accent" style="margin-bottom:12px;cursor:pointer;" onclick="setLeadFilter(null)">Filtered: '+leadFilterLabel(state.leadFilter)+' '+ic('x')+'</div>' : '') +
+    '<div style="overflow-x:auto;">' +
     '<table class="matrix"><thead><tr><th>Developer</th>' + pathKeys.map(k=>'<th>'+paths[k].name+'</th>').join('') + '</tr></thead><tbody>' +
     filtered.map(d =>
-      '<tr><td class="dev-name">'+avatar(d.name,'sm')+d.name+'</td>' +
+      '<tr><td class="dev-name" style="cursor:pointer;" onclick="openProfile(\''+d.name+'\')">'+avatar(d.name,'sm')+d.name+'</td>' +
       pathKeys.map(k => {
         const status = effectiveDevStatus(d,k);
         const isStale = status==='stale';
@@ -816,7 +1089,8 @@ function renderLeadMatrix(){
       }).join('') +
       '</tr>'
     ).join('') +
-    '</tbody></table>';
+    '</tbody></table>' +
+    '</div>';
 }
 
 /* ============ PLATFORM LEAD ============ */
@@ -826,9 +1100,9 @@ function screenPlatform(){
   return (
     '<div class="eyebrow">Platform Lead</div>' +
     '<h1 class="page-title">Standards</h1>' +
-    '<p class="page-sub">Publish updates deliberately — every publish shows exactly who it will flag stale before it commits.</p>' +
+    '<p class="page-sub">Update a standard here. Before you publish, you can see exactly who it will affect.</p>' +
     '<div class="kpi-row" style="margin-top:20px;">' +
-      kpi(pathKeys.length,'Standards') + kpi(upToDate,'Up to date') + kpi(changelog.length,'Publishes logged') + kpi(changelog.reduce((a,c)=>a+c.affected,0),'Verifications flagged (total)') +
+      kpi(pathKeys.length,'Standards') + kpi(upToDate,'Up to date') + kpi(changelog.length,'Times published') + kpi(changelog.reduce((a,c)=>a+c.affected,0),'People flagged, total') +
     '</div>' +
     '<div class="content-grid">' +
       '<div>' +
@@ -843,7 +1117,7 @@ function screenPlatform(){
         '</div>' +
         '<div class="panel" style="margin-top:20px;padding:18px 20px;">' +
           '<div class="rail-title" style="margin-bottom:6px;">Changelog</div>' +
-          changelog.map(c => '<div class="changelog-item"><div class="top"><span>'+paths[c.pathKey].name+' · '+c.version+'</span><span>'+c.date+'</span></div><div class="notes">'+c.notes+' <span class="chip amber" style="margin-left:6px;">'+c.affected+' flagged</span></div></div>').join('') +
+          changelog.map((c,i) => '<div class="changelog-item" style="cursor:pointer;" onclick="openChangelogDrawer('+i+')"><div class="top"><span>'+paths[c.pathKey].name+' · '+c.version+'</span><span>'+c.date+'</span></div><div class="notes">'+c.notes+' <span class="chip amber" style="margin-left:6px;">'+c.affected+' flagged</span></div></div>').join('') +
         '</div>' +
       '</div>' +
       activityRailHTML() +
@@ -858,6 +1132,14 @@ function openLeadDrawer(devName, pathKey){
 }
 function openPublishDrawer(pathKey){
   state.drawer = { type:'platform-publish', pathKey };
+  renderDrawer();
+}
+function openChangelogDrawer(index){
+  state.drawer = { type:'changelog-detail', index };
+  renderDrawer();
+}
+function toggleAssignPicker(){
+  if(state.drawer) state.drawer.showAssign = !state.drawer.showAssign;
   renderDrawer();
 }
 function closeDrawer(){ state.drawer = null; renderDrawer(); }
@@ -882,9 +1164,30 @@ function renderDrawer(){
         '<div class="history-item">Verified against '+paths[pathKey].version+(status==='stale'?' — now stale after publish':'')+'</div>' +
         (ov ? '<div class="history-item">Override note: "'+ov.note+'" — '+ov.by+'</div>' : '') +
         '<label>Override this status</label>' +
-        '<textarea id="override-note" placeholder="Why is this developer safe to staff despite the current status?"></textarea>' +
+        '<textarea id="override-note" placeholder="Why is it okay to staff this person anyway?"></textarea>' +
         '<button class="btn dark" style="margin-top:10px;" onclick="applyOverride(\''+dev+'\',\''+pathKey+'\')">Apply override</button>' +
-        '<button class="btn" style="margin-top:20px;width:100%;justify-content:center;" onclick="assignToProject(\''+dev+'\',\''+pathKey+'\')">Assign to project</button>' +
+        '<button class="btn" style="margin-top:20px;width:100%;justify-content:center;" onclick="toggleAssignPicker()">Assign to project '+ic('arrowRight')+'</button>' +
+        (state.drawer.showAssign ? (
+          '<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">' +
+            projects.map(pr => '<button class="btn ghost sm" style="justify-content:flex-start;color:var(--dark-text);" onclick="confirmAssignment(\''+dev+'\',\''+pathKey+'\',\''+pr+'\')">'+pr+'</button>').join('') +
+          '</div>'
+        ) : '') +
+        '<button class="btn ghost" style="margin-top:10px;width:100%;justify-content:center;color:var(--dark-text);" onclick="closeDrawer();openProfile(\''+dev+'\')">View full profile '+ic('arrowRight')+'</button>' +
+      '</div>';
+  } else if(state.drawer.type === 'changelog-detail'){
+    const c = changelog[state.drawer.index];
+    const p = paths[c.pathKey];
+    const names = c.affectedNames || [];
+    overlay.innerHTML =
+      '<div class="drawer" style="position:relative;">' +
+        '<button class="drawer-close" onclick="closeDrawer()">'+ic('x')+'</button>' +
+        '<h3>'+p.name+' · '+c.version+'</h3>' +
+        '<div class="mono" style="font-size:12px;color:var(--dark-text-soft);">published '+c.date+'</div>' +
+        '<div style="margin-top:16px;font-size:13.5px;line-height:1.55;">'+c.notes+'</div>' +
+        '<label>Flagged stale ('+names.length+')</label>' +
+        (names.length ? names.map(n =>
+          '<div class="history-item" style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="closeDrawer();switchRole(\'lead\');openLeadDrawer(\''+n+'\',\''+c.pathKey+'\')">'+avatar(n,'sm')+n+'</div>'
+        ).join('') : '<div class="history-item">No one was affected by this publish.</div>') +
       '</div>';
   } else if(state.drawer.type === 'platform-publish'){
     const { pathKey } = state.drawer;
@@ -902,7 +1205,7 @@ function renderDrawer(){
         '<div class="impact-list">' +
           '<div class="mono" style="font-size:11px;color:var(--dark-text-soft);text-transform:uppercase;letter-spacing:.06em;">Impact preview</div>' +
           (affected.length===0
-            ? '<div style="font-size:12.5px;margin-top:6px;color:var(--dark-text-soft);">No one is currently verified on this path — publishing has no impact.</div>'
+            ? '<div style="font-size:12.5px;margin-top:6px;color:var(--dark-text-soft);">No one is verified on this path yet, so publishing won\'t affect anyone.</div>'
             : affected.map(d=>'<div class="who">'+avatar(d.name,'sm')+d.name+'<span class="mono" style="margin-left:auto;font-size:11px;color:var(--dark-text-soft);">will go stale</span></div>').join('')) +
         '</div>' +
         '<button class="btn primary" style="margin-top:16px;width:100%;justify-content:center;" onclick="publishStandard(\''+pathKey+'\')">Publish anyway</button>' +
@@ -916,14 +1219,16 @@ function nextVersion(v){
 }
 function applyOverride(devName, pathKey){
   const note = (document.getElementById('override-note')||{}).value || '(no note provided)';
-  overrides[devName+'|'+pathKey] = { note, by:'Dee Fernandes' };
-  pushActivity('Dee Fernandes', 'overrode '+devName+' on <b>'+paths[pathKey].name+'</b>', 'info', 'amber');
+  overrides[devName+'|'+pathKey] = { note, by:'Vikram Rao' };
+  pushActivity('Vikram Rao', 'overrode '+devName+' on <b>'+paths[pathKey].name+'</b>', 'info', 'amber', {type:'dev-path', dev:devName, pathKey});
   closeDrawer();
   render();
 }
-function assignToProject(devName, pathKey){
-  pushActivity('Dee Fernandes', 'assigned '+devName+' using their <b>'+paths[pathKey].name+'</b> status', 'layers', 'accent');
+function confirmAssignment(devName, pathKey, project){
+  assignments.unshift({ dev:devName, project, pathKey, by:'Vikram Rao', ts:nowLabel() });
+  pushActivity('Vikram Rao', 'assigned '+devName+' to <b>'+project+'</b> using their <b>'+paths[pathKey].name+'</b> status', 'layers', 'accent', {type:'dev-path', dev:devName, pathKey});
   closeDrawer();
+  render();
 }
 function publishStandard(pathKey){
   const p = paths[pathKey];
@@ -934,13 +1239,10 @@ function publishStandard(pathKey){
   Object.keys(overrides).forEach(k => { if(k.endsWith('|'+pathKey)) delete overrides[k]; });
   p.version = version;
   p.latestVersion = version;
-  if(state.role==='learner' && state.activePathKey===pathKey){
-    p.modules.forEach(m => { if(m.status==='done') m.status='stale'; });
-  } else {
-    p.modules.forEach(m => { if(m.status==='done') m.status='stale'; });
-  }
-  changelog.unshift({ pathKey, version, date:'Aug 27, 2026', notes, affected: affected.length });
-  pushActivity('Rae Chen', 'published <b>'+p.name+' '+version+'</b> — '+affected.length+' verification(s) flagged stale', 'layers', affected.length ? 'red' : 'accent');
+  p.modules.forEach(m => { if(m.status==='done') m.status='stale'; });
+  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
+  changelog.unshift({ pathKey, version, date:today, notes, affected: affected.length, affectedNames: affected.map(d=>d.name) });
+  pushActivity('Kavya Reddy', 'published <b>'+p.name+' '+version+'</b> — '+affected.length+' verification(s) flagged stale', 'layers', affected.length ? 'red' : 'accent', {type:'changelog', pathKey, version});
   closeDrawer();
   render();
 }
@@ -959,7 +1261,7 @@ function renderPaletteResults(){
   const q = (document.getElementById('palette-input').value || '').toLowerCase();
   const results = [];
   Object.keys(paths).forEach(k => { if(paths[k].name.toLowerCase().includes(q)) results.push({label:paths[k].name, kind:'Path', action:"switchRole('learner');navigate('l-path','"+k+"')"}); });
-  devs.forEach(d => { if(d.name.toLowerCase().includes(q)) results.push({label:d.name, kind:'Developer', action:"switchRole('lead')"}); });
+  devs.forEach(d => { if(d.name.toLowerCase().includes(q)) results.push({label:d.name, kind:'Developer', action:"switchRole('lead');openProfile('"+d.name+"')"}); });
   Object.keys(paths).forEach(k => { if(paths[k].sopRef.toLowerCase().includes(q)) results.push({label:paths[k].sopRef, kind:'Standard', action:"switchRole('platform')"}); });
   const host = document.getElementById('palette-results');
   host.innerHTML = results.length ? results.map(r => '<div class="palette-result" onclick="'+r.action+';closePalette()">'+ic('search')+'<span>'+r.label+'</span><span class="kind">'+r.kind+'</span></div>').join('') : '<div class="palette-result" style="color:var(--ink-faint);">No matches</div>';
