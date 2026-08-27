@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Readyline — Staffing Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#2E56E8;
+    --accent-ink:#1a3bb8;
+    --accent-wash:rgba(46,86,232,.08);
+    --accent-wash-strong:rgba(46,86,232,.16);
+    --green-ink:#166534;
+    --green-wash:#e3f6ea;
+    --green-border:#bfe8cd;
+    --amber-ink:#92620a;
+    --amber-wash:#fdf1da;
+    --amber-border:#f3ddab;
+    --red-ink:#a3282f;
+    --red-wash:#fbe7e8;
+    --red-border:#f0c3c6;
+    --neutral-ink:#6b7080;
+    --neutral-wash:#eceef1;
+    --neutral-border:#dde0e5;
+    --ink:#161821;
+    --ink-soft:#565b68;
+    --ink-faint:#8b8f9c;
+    --paper:#f2f3f6;
+    --panel-sunken:#e5e7ec;
+    --panel:#ffffff;
+    --dark:#14161f;
+    --dark-soft:#1d2030;
+    --dark-line:rgba(255,255,255,.09);
+    --dark-text:#eef0f6;
+    --dark-text-soft:#a7abbc;
+    --border:#dfe2e8;
+    --radius-sm:6px;
+    --radius:10px;
+    --radius-lg:16px;
+    --sh-xs:0 1px 1px rgba(20,22,31,.05), 0 1px 2px rgba(20,22,31,.06);
+    --sh-sm:0 1px 2px rgba(20,22,31,.06), 0 4px 10px rgba(20,22,31,.07);
+    --sh-md:0 2px 4px rgba(20,22,31,.08), 0 10px 24px rgba(20,22,31,.10);
+    --sh-lg:0 4px 8px rgba(20,22,31,.10), 0 24px 56px rgba(20,22,31,.18);
+    --mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{margin:0;font-family:var(--sans);}
+  p{margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;text-decoration:none;}
+  .icon{width:16px;height:16px;flex-shrink:0;}
+  .icon.lg{width:20px;height:20px;}
+  .icon.xl{width:28px;height:28px;}
+  .mono{font-family:var(--mono);}
+  .hidden{display:none !important;}
+
+  /* ---------- App shell ---------- */
+  #app{display:flex;min-height:100vh;}
+  .sidebar{
+    width:232px;flex-shrink:0;background:var(--dark);color:var(--dark-text);
+    display:flex;flex-direction:column;padding:20px 16px;gap:20px;
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:2px 4px 12px;border-bottom:1px solid var(--dark-line);}
+  .brand-mark{width:28px;height:28px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;font-size:13px;color:#fff;flex-shrink:0;}
+  .brand-name{font-family:var(--mono);font-weight:600;font-size:14px;letter-spacing:.02em;}
+  .brand-sub{font-size:10px;color:var(--dark-text-soft);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;}
+
+  .palette-trigger{
+    display:flex;align-items:center;gap:8px;background:var(--dark-soft);border:1px solid var(--dark-line);
+    border-radius:var(--radius-sm);padding:8px 10px;color:var(--dark-text-soft);font-size:12.5px;font-family:var(--mono);
+  }
+  .palette-trigger:hover{border-color:rgba(255,255,255,.2);}
+  .palette-trigger kbd{margin-left:auto;background:rgba(255,255,255,.08);border-radius:4px;padding:1px 6px;font-size:11px;}
+
+  .nav-group{display:flex;flex-direction:column;gap:2px;}
+  .nav-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--dark-text-soft);padding:0 8px;margin-bottom:6px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);
+    color:var(--dark-text-soft);font-size:13.5px;border:none;background:transparent;text-align:left;width:100%;
+  }
+  .nav-item:hover{background:var(--dark-soft);color:var(--dark-text);}
+  .nav-item.active{background:var(--accent-wash-strong);color:#fff;}
+  .nav-item.active .icon{color:var(--accent);}
+  .nav-item .icon{color:var(--dark-text-soft);}
+
+  .role-switch{display:flex;flex-direction:column;gap:4px;margin-top:auto;padding-top:12px;border-top:1px solid var(--dark-line);}
+  .role-btn{
+    display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--radius-sm);border:1px solid transparent;
+    background:transparent;color:var(--dark-text-soft);font-size:12.5px;text-align:left;width:100%;
+  }
+  .role-btn:hover{background:var(--dark-soft);}
+  .role-btn.active{background:var(--dark-soft);border-color:var(--dark-line);color:var(--dark-text);}
+  .avatar{
+    width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-weight:600;font-size:10.5px;color:#fff;flex-shrink:0;
+  }
+  .avatar.sm{width:20px;height:20px;font-size:9px;}
+  .avatar.lg{width:38px;height:38px;font-size:14px;}
+  .identity{display:flex;flex-direction:column;line-height:1.25;overflow:hidden;}
+  .identity .who{font-size:12.5px;font-weight:500;color:var(--dark-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .identity .role{font-size:10.5px;color:var(--dark-text-soft);font-family:var(--mono);}
+
+  /* ---------- Main content ---------- */
+  main{flex:1;min-width:0;}
+  .content-inner{max-width:1360px;margin:0 auto;padding:22px 32px 64px;}
+  .topstrip{display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;margin-bottom:22px;border-bottom:1px solid var(--border);}
+  .breadcrumb{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
+  .breadcrumb b{color:var(--ink);font-weight:600;}
+  .bell{position:relative;width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--panel);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);}
+  .bell.lit{color:var(--red-ink);border-color:var(--red-border);}
+  .bell .dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--red-ink);}
+
+  .content-grid{display:grid;grid-template-columns:1fr 296px;gap:24px;align-items:start;}
+  .content-grid.single{grid-template-columns:1fr;}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-faint);margin-bottom:6px;}
+  .page-title{font-size:22px;font-weight:700;letter-spacing:-.01em;}
+  .page-sub{font-size:13.5px;color:var(--ink-soft);margin-top:6px;max-width:60ch;line-height:1.5;}
+
+  /* ---------- Cards / panels ---------- */
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--sh-xs);}
+  .panel.raised{box-shadow:var(--sh-sm);}
+  .panel.raised:hover{box-shadow:var(--sh-md);}
+  .sunken{background:var(--panel-sunken);border:1px solid var(--border);border-radius:var(--radius);}
+  .dark-card{background:var(--dark);color:var(--dark-text);border-radius:var(--radius-lg);box-shadow:var(--sh-lg);}
+
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--panel);color:var(--ink);font-size:13px;font-weight:500;}
+  .btn:hover{box-shadow:var(--sh-sm);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{background:var(--accent-ink);}
+  .btn.dark{background:var(--dark);border-color:var(--dark);color:#fff;}
+  .btn.ghost{background:transparent;border-color:transparent;}
+  .btn.ghost:hover{background:var(--panel-sunken);box-shadow:none;}
+  .btn.sm{padding:6px 10px;font-size:12px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn:disabled:hover{box-shadow:none;}
+
+  /* ---------- Badges / chips ---------- */
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-family:var(--mono);font-size:11px;font-weight:500;border:1px solid transparent;white-space:nowrap;}
+  .chip.green{background:var(--green-wash);color:var(--green-ink);border-color:var(--green-border);}
+  .chip.amber{background:var(--amber-wash);color:var(--amber-ink);border-color:var(--amber-border);}
+  .chip.red{background:var(--red-wash);color:var(--red-ink);border-color:var(--red-border);}
+  .chip.neutral{background:var(--neutral-wash);color:var(--neutral-ink);border-color:var(--neutral-border);}
+  .chip.accent{background:var(--accent-wash);color:var(--accent-ink);border-color:var(--accent-wash-strong);}
+
+  /* ---------- KPI row ---------- */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .kpi{padding:16px 18px;}
+  .kpi .num{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.02em;}
+  .kpi .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+
+  /* ---------- Hero (learner dashboard) ---------- */
+  .hero{padding:26px 28px;display:flex;flex-direction:column;gap:14px;margin-bottom:26px;}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;}
+  .hero-title{font-size:19px;font-weight:600;}
+  .hero-desc{color:var(--dark-text-soft);font-size:13.5px;line-height:1.55;max-width:56ch;}
+  .hero-meta{display:flex;gap:18px;font-family:var(--mono);font-size:11.5px;color:var(--dark-text-soft);}
+  .hero-actions{display:flex;gap:10px;margin-top:4px;}
+
+  /* ---------- Rows list (learner secondary paths) ---------- */
+  .row-list{display:flex;flex-direction:column;gap:10px;}
+  .path-row{display:flex;align-items:center;gap:14px;padding:14px 16px;}
+  .path-row .name{font-weight:600;font-size:13.5px;}
+  .path-row .sub{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);margin-top:2px;}
+  .path-row .spacer{flex:1;}
+
+  /* ---------- Stepper (CI pipeline) ---------- */
+  .stepper{display:flex;align-items:center;gap:0;margin:22px 0 28px;}
+  .step{display:flex;align-items:center;gap:10px;flex:1;}
+  .step-node{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--border);background:var(--panel);color:var(--ink-faint);flex-shrink:0;}
+  .step-node.done{background:var(--green-wash);border-color:var(--green-border);color:var(--green-ink);}
+  .step-node.pending{background:var(--amber-wash);border-color:var(--amber-border);color:var(--amber-ink);}
+  .step-node.stale{background:var(--red-wash);border-color:var(--red-border);color:var(--red-ink);}
+  .step-label{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);}
+  .step-label b{display:block;color:var(--ink);font-size:12.5px;font-family:var(--sans);font-weight:600;}
+  .step-line{flex:1;height:2px;background:var(--border);margin:0 8px;}
+  .step-line.done{background:var(--green-border);}
+
+  /* ---------- Accordion (module list) ---------- */
+  .accordion-item{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--panel);overflow:hidden;}
+  .accordion-head{display:flex;align-items:center;gap:12px;padding:15px 16px;width:100%;background:transparent;border:none;text-align:left;}
+  .accordion-head:hover{background:var(--panel-sunken);}
+  .accordion-head .title{font-weight:600;font-size:13.5px;flex:1;}
+  .accordion-body{padding:0 18px 18px;font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
+  .core-rule{background:var(--accent-wash);border:1px solid var(--accent-wash-strong);border-radius:var(--radius-sm);padding:11px 13px;font-weight:600;color:var(--ink);font-size:13.5px;margin-bottom:10px;}
+  .why-toggle{font-family:var(--mono);font-size:12px;color:var(--accent);background:none;border:none;padding:6px 0;display:flex;align-items:center;gap:5px;}
+  .why-body{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+
+  /* ---------- Terminal / code window ---------- */
+  .terminal{background:var(--dark);border-radius:var(--radius);overflow:hidden;box-shadow:var(--sh-md);}
+  .terminal-bar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:var(--dark-soft);border-bottom:1px solid var(--dark-line);}
+  .terminal-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18);}
+  .terminal-file{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--dark-text-soft);}
+  .terminal-body{padding:16px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#c7cbe0;overflow-x:auto;white-space:pre;}
+  .terminal-body .ln{color:#565a72;display:inline-block;width:22px;user-select:none;}
+
+  .statement{display:flex;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--panel);}
+  .statement.flagged{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  .statement.correct{border-color:var(--green-border);background:var(--green-wash);}
+  .statement.incorrect{border-color:var(--red-border);background:var(--red-wash);}
+  .statement input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;}
+  .statement .text{font-size:13.5px;line-height:1.5;flex:1;}
+  .statement .hint-btn{font-family:var(--mono);font-size:11px;color:var(--accent);background:none;border:none;padding:6px 0 0;}
+  .statement .hint{font-size:12px;color:var(--ink-soft);margin-top:6px;padding:8px 10px;background:var(--panel-sunken);border-radius:6px;}
+  .statement .why{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);line-height:1.5;}
+
+  /* ---------- Matrix (tech lead) ---------- */
+  .matrix-controls{display:flex;gap:10px;margin-bottom:14px;}
+  .search-input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--mono);font-size:12.5px;background:var(--panel);}
+  .search-input:focus{outline:2px solid var(--accent-wash-strong);border-color:var(--accent);}
+  table.matrix{width:100%;border-collapse:collapse;font-size:13px;}
+  table.matrix th{text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);padding:10px 12px;border-bottom:1px solid var(--border);}
+  table.matrix td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  table.matrix td.cell-status{cursor:pointer;border-radius:6px;}
+  table.matrix td.cell-status.stale-td{background:var(--red-wash);}
+  table.matrix .dev-name{display:flex;align-items:center;gap:10px;font-weight:500;}
+
+  /* ---------- Standards cards (platform) ---------- */
+  .standards-grid{display:flex;flex-direction:column;gap:14px;}
+  .standard-card{padding:18px 20px;display:flex;align-items:center;gap:18px;}
+  .standard-card .info{flex:1;}
+  .standard-card .name{font-weight:600;font-size:14.5px;}
+  .standard-card .ref{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
+  .standard-card .ver{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-top:8px;}
+
+  .changelog-item{padding:12px 0;border-bottom:1px solid var(--border);}
+  .changelog-item:last-child{border-bottom:none;}
+  .changelog-item .top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .changelog-item .notes{font-size:13px;margin-top:4px;}
+
+  /* ---------- Activity rail ---------- */
+  .rail-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin-bottom:12px;}
+  .activity-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .activity-icon.green{background:var(--green-wash);color:var(--green-ink);}
+  .activity-icon.amber{background:var(--amber-wash);color:var(--amber-ink);}
+  .activity-icon.red{background:var(--red-wash);color:var(--red-ink);}
+  .activity-icon.accent{background:var(--accent-wash);color:var(--accent);}
+  .activity-text{font-size:12.5px;line-height:1.45;}
+  .activity-text b{font-weight:600;}
+  .activity-ts{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-top:2px;}
+  .rail-panel{padding:16px;position:sticky;top:22px;}
+
+  /* ---------- Overlay / drawer / palette ---------- */
+  .overlay-scrim{position:fixed;inset:0;background:rgba(20,22,31,.5);display:flex;z-index:50;}
+  .drawer{margin-left:auto;width:420px;max-width:92vw;height:100vh;background:var(--dark);color:var(--dark-text);box-shadow:var(--sh-lg);overflow-y:auto;padding:24px;}
+  .drawer h3{font-size:16px;margin-bottom:4px;}
+  .drawer-close{position:absolute;top:18px;right:18px;color:var(--dark-text-soft);background:none;border:none;}
+  .drawer label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dark-text-soft);margin:16px 0 6px;}
+  .drawer input[type=text], .drawer textarea{width:100%;padding:9px 11px;border-radius:var(--radius-sm);border:1px solid var(--dark-line);background:var(--dark-soft);color:var(--dark-text);font-family:var(--sans);font-size:13px;}
+  .drawer textarea{min-height:70px;resize:vertical;}
+  .drawer .history-item{padding:10px 0;border-bottom:1px solid var(--dark-line);font-size:12.5px;}
+  .impact-list{margin-top:10px;padding:12px;background:var(--dark-soft);border-radius:var(--radius-sm);border:1px solid var(--dark-line);}
+  .impact-list .who{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px;}
+
+  .palette-box{margin:8vh auto 0;width:560px;max-width:92vw;background:var(--panel);border-radius:var(--radius-lg);box-shadow:var(--sh-lg);overflow:hidden;height:fit-content;}
+  .palette-input{width:100%;border:none;border-bottom:1px solid var(--border);padding:16px 18px;font-size:15px;font-family:var(--sans);outline:none;}
+  .palette-results{max-height:360px;overflow-y:auto;padding:8px;}
+  .palette-result{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;}
+  .palette-result:hover{background:var(--panel-sunken);}
+  .palette-result .kind{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+
+  /* ---------- Responsive (kept at end on purpose) ---------- */
+  @media (max-width:980px){
+    .content-grid{grid-template-columns:1fr;}
+    .rail-panel{position:static;order:-1;margin-bottom:22px;}
+  }
+  @media (max-width:860px){
+    #app{flex-direction:column;}
+    .sidebar{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:12px 14px;gap:14px;}
+    .brand{border-bottom:none;padding:0;flex-shrink:0;}
+    .palette-trigger{flex-shrink:0;width:180px;}
+    .nav-group{flex-direction:row;flex-shrink:0;}
+    .nav-label{display:none;}
+    .role-switch{flex-direction:row;margin-top:0;border-top:none;padding-top:0;flex-shrink:0;}
+  }
+  @media (max-width:640px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .content-inner{padding:18px 16px 48px;}
+    .hero-meta span.sync-text{display:none;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <div class="content-inner">
+      <div class="topstrip" id="topstrip"></div>
+      <div id="screen-root"></div>
+    </div>
+  </main>
+</div>
+
+<div id="palette-overlay" class="overlay-scrim hidden">
+  <div class="palette-box">
+    <input class="palette-input" id="palette-input" placeholder="Search paths, developers, standards…" oninput="renderPaletteResults()">
+    <div class="palette-results" id="palette-results"></div>
+  </div>
+</div>
+
+<div id="drawer-overlay" class="overlay-scrim hidden" style="position:fixed;"></div>
+
+<script>
+/* ============ ICONS ============ */
+const ICON_PATHS = {
+  check: '<path d="M5 13l4 4L19 7"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  alert: '<path d="M10.3 3.9L1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>',
+  arrowLeft: '<path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/>',
+  arrowRight: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+  dot: '<circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  minus: '<path d="M5 12h14"/>',
+  layers: '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+};
+function ic(name, cls){ return '<svg class="icon '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICON_PATHS[name]+'</svg>'; }
+
+/* ============ DATA MODEL ============ */
+const paths = {
+  backend: {
+    name: 'Backend Standards',
+    sopRef: 'backend-common-structure',
+    version: 'v1.2',
+    latestVersion: 'v1.2',
+    intro: 'How we structure NestJS services: rate limiting, pagination, validation, and error handling that client engineers can rely on without re-reading the source.',
+    modules: [
+      { id:'read', stage:'Reading', title:'Read the standard', status:'done',
+        core:'Every list endpoint must be paginated and rate-limited before it ships — no exceptions for "internal only" routes.',
+        body:'The standard covers four load-bearing patterns: cursor-or-offset pagination on every list route, a shared @Throttle guard applied per-route (not globally, which hides which routes actually need it), DTO validation with class-validator at the controller boundary, and typed error codes instead of generic 500s. Each pattern exists because of a specific incident — the rationale for all four is in the full SOP.',
+        source:'backend-common-structure' },
+      { id:'try', stage:'Try it', title:'Apply it to a sample route', status:'done',
+        body:'A short guided exercise: take an unpaginated /orders route and bring it into compliance — add page/limit params, a @Throttle decorator, and a typed error response for the downstream failure case. No grading here, just repetition.' },
+      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'pending',
+        body:'A simulated code review: read a controller diff and flag every statement about it that describes a real violation of the standard. This is graded — it is the signal a tech lead actually sees.' }
+    ]
+  },
+  frontend: {
+    name: 'Frontend Standards',
+    sopRef: 'frontend-common-structure',
+    version: 'v2.0',
+    latestVersion: 'v2.0',
+    intro: 'Next.js 15 project layout, API call conventions, auth handling, and the filtering/pagination patterns that keep client and server in sync.',
+    modules: [
+      { id:'read', stage:'Reading', title:'Read the standard', status:'pending',
+        core:'Every data-fetching component owns its loading, error, and empty states explicitly — no bare fetch calls in page components.',
+        body:'Covers the app-router route layout convention, the shared API client wrapper (which handles auth headers and 429 rate-limit surfacing automatically), and how filter/pagination state is kept in the URL rather than component state so it survives a refresh.',
+        source:'frontend-common-structure' },
+      { id:'try', stage:'Try it', title:'Apply it to a sample page', status:'locked', body:'Wire a listing page to the shared API client and move its filter state into the URL.' },
+      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'locked', body:'Not yet available — complete Reading and Try it first.' }
+    ]
+  },
+  security: {
+    name: 'Security Standards',
+    sopRef: 'secure-development',
+    version: 'v1.4',
+    latestVersion: 'v1.4',
+    intro: 'Application and cloud security practices: input handling, auth, secrets, and the IAM/network basics every client-facing engineer is expected to know.',
+    modules: [
+      { id:'read', stage:'Reading', title:'Read the standard', status:'locked',
+        core:'Secrets never enter source control, CI logs, or client-visible payloads — including "temporary" debug output.',
+        body:'Covers input validation at trust boundaries, secret management via the platform vault (never .env committed), least-privilege IAM defaults, and the checklist used before any change touching auth or PII ships.',
+        source:'secure-development' },
+      { id:'try', stage:'Try it', title:'Apply it to a sample change', status:'locked', body:'Not yet available.' },
+      { id:'checkpoint', stage:'Checkpoint', title:'Review a real PR diff', status:'locked', body:'Not yet available.' }
+    ]
+  }
+};
+
+const devs = [
+  { name:'Jordan Blake',    backend:'pending',     frontend:'not_started', security:'not_started' },
+  { name:'Amara Osei',      backend:'done',        frontend:'done',        security:'pending' },
+  { name:'Priya Nair',      backend:'stale',       frontend:'done',        security:'not_started' },
+  { name:'Sam Whitfield',   backend:'done',        frontend:'not_started', security:'not_started' },
+  { name:'Ken Ibarra',      backend:'not_started', frontend:'not_started', security:'done' },
+  { name:'Lena Kowalski',   backend:'done',        frontend:'pending',     security:'done' },
+];
+
+const overrides = {}; // "<devName>|<pathKey>" -> {note, by}
+
+const changelog = [
+  { pathKey:'backend', version:'v1.1', date:'2026-06-02', notes:'Added the requirement that rate-limit guards be applied per-route rather than globally.', affected:2 },
+  { pathKey:'frontend', version:'v2.0', date:'2026-07-14', notes:'Moved filter/pagination state guidance to require URL state instead of component state.', affected:1 },
+];
+
+const activityLog = [
+  { ts:'Aug 25, 4:12 PM', actor:'Rae Chen', text:'published <b>Frontend Standards v2.0</b>', icon:'layers', tone:'accent' },
+  { ts:'Aug 25, 11:03 AM', actor:'Amara Osei', text:'was verified on <b>Backend Standards</b>', icon:'check', tone:'green' },
+  { ts:'Aug 24, 3:40 PM', actor:'Dee Fernandes', text:'overrode Priya Nair on <b>Backend Standards</b>', icon:'info', tone:'amber' },
+  { ts:'Aug 22, 9:15 AM', actor:'Priya Nair', text:'was flagged stale on <b>Backend Standards</b>', icon:'alert', tone:'red' },
+];
+
+const checkpointStatements = [
+  { id:1, text:'The GET /orders controller queries the database directly with no page or limit parameter, returning every matching row.', violation:true,
+    hint:'Check the query builder call before it reaches the database — is anything bounding the result set?',
+    why:'Unbounded list endpoints are the standard’s #1 flagged issue — every list route must accept and enforce page/limit, or a large account can take down the query.' },
+  { id:2, text:'When the payment gateway call fails, the handler retries up to 5 times immediately with no backoff between attempts.', violation:true,
+    hint:'Look at how the retry loop is triggered and what (if anything) happens between attempts.',
+    why:'Retrying without exponential backoff can turn a brief downstream blip into a self-inflicted outage by hammering a service that’s already struggling.' },
+  { id:3, text:'The controller validates the incoming request body with a DTO decorated using class-validator before processing it.', violation:false,
+    hint:null,
+    why:'This is correct as written — DTO validation at the controller boundary is exactly what the standard requires. Not a violation.' },
+  { id:4, text:'The shared @Throttle rate-limit guard is applied to the POST /orders route, but not to the GET /orders list route.', violation:true,
+    hint:'The standard requires rate limiting on every route that can be hit repeatedly — does "some routes" satisfy that?',
+    why:'Partial application of the guard is still a violation — an unthrottled list route is exactly the kind of route most likely to be hit repeatedly by a runaway client.' },
+  { id:5, text:'Errors returned by the downstream service are caught and mapped to a typed, documented error code before being sent to the caller.', violation:false,
+    hint:null,
+    why:'This is the compliant pattern — typed error codes instead of a generic 500. Not a violation.' },
+];
+
+/* ============ STATE ============ */
+const state = {
+  role: 'learner',            // 'learner' | 'lead' | 'platform'
+  screen: 'l-dashboard',      // current screen id
+  activePathKey: null,        // for l-path / l-checkpoint
+  selected: new Set(),        // selected checkpoint statement ids
+  submitted: false,
+  hintsShown: new Set(),
+  drawer: null,               // {type:'lead-cell', dev, pathKey} | {type:'platform-publish', pathKey}
+};
+
+const USERS = {
+  learner:  { name:'Jordan Blake',   title:'Learner' },
+  lead:     { name:'Dee Fernandes',  title:'Tech Lead' },
+  platform: { name:'Rae Chen',       title:'Platform Lead' },
+};
+
+const AVATAR_PALETTE = ['#2E56E8','#7C3AED','#0F9D8C','#D9770D','#C2418F','#3D7A2E','#B5401E'];
+function avatarColor(name){
+  let h = 0;
+  for(let i=0;i<name.length;i++) h = (h*31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[h % AVATAR_PALETTE.length];
+}
+function initials(name){
+  return name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+}
+function avatar(name, size){
+  return '<span class="avatar '+(size||'')+'" style="background:'+avatarColor(name)+'">'+initials(name)+'</span>';
+}
+
+/* ============ STATUS HELPERS ============ */
+// Design system rule: green = verified, amber = in-progress, red = stale.
+function statusMeta(status){
+  switch(status){
+    case 'done': return {label:'Verified', tone:'green', icon:'check'};
+    case 'pending': return {label:'In progress', tone:'amber', icon:'clock'};
+    case 'stale': return {label:'Stale', tone:'red', icon:'alert'};
+    case 'locked': return {label:'Locked', tone:'neutral', icon:'lock'};
+    case 'not_started': default: return {label:'Not started', tone:'neutral', icon:'minus'};
+  }
+}
+function effectiveDevStatus(dev, pathKey){
+  const ov = overrides[dev.name+'|'+pathKey];
+  if(ov) return 'done';
+  return dev[pathKey];
+}
+
+/* ============ ACTIVITY LOG ============ */
+function pushActivity(actor, text, icon, tone){
+  activityLog.unshift({ ts:'Just now', actor, text, icon, tone });
+  document.querySelectorAll('.activity-rail').forEach(renderActivityRailInto);
+  updateBell();
+}
+function renderActivityRailInto(container){
+  container.innerHTML =
+    '<div class="rail-title">Activity</div>' +
+    activityLog.slice(0,12).map(a =>
+      '<div class="activity-item">' +
+        '<span class="activity-icon '+a.tone+'">'+ic(a.icon)+'</span>' +
+        '<div><div class="activity-text"><b>'+a.actor+'</b> '+a.text+'</div><div class="activity-ts">'+a.ts+'</div></div>' +
+      '</div>'
+    ).join('');
+}
+function activityRailHTML(){ return '<div class="panel rail-panel activity-rail"></div>'; }
+function updateBell(){
+  const bell = document.getElementById('bell');
+  if(!bell) return;
+  const recentBad = activityLog[0] && activityLog[0].tone === 'red';
+  bell.classList.toggle('lit', !!recentBad);
+  bell.innerHTML = ic('alert','lg') + (recentBad ? '<span class="dot"></span>' : '');
+}
+function showLatestActivity(){
+  const a = activityLog[0];
+  if(!a) return;
+  alert(a.actor + ' ' + a.text.replace(/<\/?b>/g,'') + ' — ' + a.ts);
+}
+
+/* ============ NAV / RENDER DISPATCH ============ */
+function switchRole(role){
+  state.role = role;
+  state.screen = role === 'learner' ? 'l-dashboard' : role === 'lead' ? 'app-lead' : 'app-platform';
+  state.activePathKey = null;
+  render();
+}
+function navigate(screen, pathKey){
+  state.screen = screen;
+  state.activePathKey = pathKey || null;
+  state.selected = new Set();
+  state.submitted = false;
+  state.hintsShown = new Set();
+  render();
+}
+function render(){
+  renderSidebar();
+  renderTopstrip();
+  const root = document.getElementById('screen-root');
+  if(state.screen === 'l-dashboard') root.innerHTML = screenLearnerDashboard();
+  else if(state.screen === 'l-path') root.innerHTML = screenLearnerPath(state.activePathKey);
+  else if(state.screen === 'l-checkpoint') root.innerHTML = screenLearnerCheckpoint(state.activePathKey);
+  else if(state.screen === 'app-lead'){ root.innerHTML = screenLead(); renderLeadMatrix(); }
+  else if(state.screen === 'app-platform') root.innerHTML = screenPlatform();
+  document.querySelectorAll('.activity-rail').forEach(renderActivityRailInto);
+  updateBell();
+  renderDrawer();
+}
+
+function renderSidebar(){
+  const el = document.getElementById('sidebar');
+  const user = USERS[state.role];
+  let nav = '';
+  if(state.role === 'learner'){
+    nav =
+      navGroup('Overview', [
+        navItem('layers','Dashboard', state.screen==='l-dashboard', "navigate('l-dashboard')")
+      ]) +
+      navGroup('Paths', Object.keys(paths).map(k =>
+        navItem(pathIconFor(k), paths[k].name, state.activePathKey===k && (state.screen==='l-path'||state.screen==='l-checkpoint'), "navigate('l-path','"+k+"')")
+      ));
+  } else if(state.role === 'lead'){
+    nav = navGroup('Overview', [ navItem('layers','Team Readiness', state.screen==='app-lead', "navigate('app-lead')") ]);
+  } else {
+    nav = navGroup('Overview', [ navItem('layers','Standards', state.screen==='app-platform', "navigate('app-platform')") ]);
+  }
+  el.innerHTML =
+    '<div class="brand"><div class="brand-mark">R</div><div><div class="brand-name">Readyline</div><div class="brand-sub">Linearloop</div></div></div>' +
+    '<button class="palette-trigger" onclick="openPalette()">'+ic('search')+'<span>Search…</span><kbd>/</kbd></button>' +
+    nav +
+    '<div class="role-switch">' +
+      roleBtn('learner','Jordan Blake','Learner') +
+      roleBtn('lead','Dee Fernandes','Tech Lead') +
+      roleBtn('platform','Rae Chen','Platform Lead') +
+    '</div>';
+}
+function pathIconFor(k){ return k==='security' ? 'lock' : 'layers'; }
+function navGroup(label, items){ return '<div class="nav-group"><div class="nav-label">'+label+'</div>'+items.join('')+'</div>'; }
+function navItem(icon,label,active,onclick){ return '<button class="nav-item '+(active?'active':'')+'" onclick="'+onclick+'">'+ic(icon)+'<span>'+label+'</span></button>'; }
+function roleBtn(role,name,title){
+  const active = state.role===role;
+  return '<button class="role-btn '+(active?'active':'')+'" onclick="switchRole(\''+role+'\')">'+avatar(name,'sm')+
+    '<span class="identity"><span class="who">'+name+'</span><span class="role">'+title+'</span></span></button>';
+}
+
+function renderTopstrip(){
+  const el = document.getElementById('topstrip');
+  const user = USERS[state.role];
+  let crumb = '';
+  if(state.screen==='l-dashboard') crumb = '<b>Dashboard</b>';
+  else if(state.screen==='l-path') crumb = 'Dashboard / <b>'+paths[state.activePathKey].name+'</b>';
+  else if(state.screen==='l-checkpoint') crumb = 'Dashboard / '+paths[state.activePathKey].name+' / <b>Checkpoint</b>';
+  else if(state.screen==='app-lead') crumb = '<b>Team Readiness</b>';
+  else if(state.screen==='app-platform') crumb = '<b>Standards</b>';
+  el.innerHTML =
+    '<div class="breadcrumb">'+crumb+'</div>' +
+    '<div style="display:flex;align-items:center;gap:14px;">' +
+      '<button class="bell" id="bell" onclick="showLatestActivity()"></button>' +
+      avatar(user.name,'sm') +
+    '</div>';
+}
+
+/* ============ LEARNER: DASHBOARD ============ */
+function priorityRank(status){ return status==='stale' ? 0 : status==='pending' ? 1 : status==='not_started' ? 2 : 3; }
+function screenLearnerDashboard(){
+  const jordan = devs.find(d=>d.name==='Jordan Blake');
+  const ranked = Object.keys(paths).slice().sort((a,b)=> priorityRank(jordan[a]) - priorityRank(jordan[b]));
+  const heroKey = ranked[0];
+  const heroPath = paths[heroKey];
+  const heroStatus = jordan[heroKey];
+  const rest = ranked.slice(1);
+  const heroActionLabel = heroStatus==='stale' ? 'Re-verify' : heroStatus==='not_started' ? 'Start path' : 'Continue';
+
+  return (
+    '<div class="eyebrow">Welcome back</div>' +
+    '<h1 class="page-title">Jordan Blake</h1>' +
+    '<p class="page-sub">One path is worth acting on right now — everything else can wait.</p>' +
+    '<div class="content-grid" style="margin-top:22px;">' +
+      '<div>' +
+        '<div class="dark-card hero">' +
+          '<div class="hero-top">' +
+            '<div><div class="eyebrow" style="color:var(--dark-text-soft);">Up next</div><div class="hero-title">'+heroPath.name+'</div></div>' +
+            statusChip(heroStatus) +
+          '</div>' +
+          '<div class="hero-desc">'+heroPath.intro+'</div>' +
+          '<div class="hero-meta"><span>'+ic('layers')+' '+heroPath.sopRef+'</span><span class="sync-text">'+ic('clock')+' verified against '+heroPath.version+'</span></div>' +
+          '<div class="hero-actions"><button class="btn primary" onclick="navigate(\'l-path\',\''+heroKey+'\')">'+heroActionLabel+' '+ic('arrowRight')+'</button></div>' +
+        '</div>' +
+        '<div class="row-list">' +
+          rest.map(k => {
+            const p = paths[k], st = jordan[k];
+            return '<div class="panel path-row" onclick="navigate(\'l-path\',\''+k+'\')" style="cursor:pointer;">' +
+              avatar(p.name,'sm') +
+              '<div><div class="name">'+p.name+'</div><div class="sub">'+p.sopRef+' · '+p.version+'</div></div>' +
+              '<div class="spacer"></div>' + statusChip(st) +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      activityRailHTML() +
+    '</div>'
+  );
+}
+function statusChip(status){
+  const m = statusMeta(status);
+  return '<span class="chip '+m.tone+'">'+ic(m.icon)+m.label+'</span>';
+}
+
+/* ============ LEARNER: PATH DETAIL ============ */
+function screenLearnerPath(key){
+  const p = paths[key];
+  const stale = p.version !== p.latestVersion;
+  return (
+    '<div class="eyebrow">Path</div>' +
+    '<h1 class="page-title">'+p.name+'</h1>' +
+    '<p class="page-sub">'+p.intro+'</p>' +
+    (stale ? '<div class="chip red" style="margin-top:10px;">'+ic('alert')+'Standard updated to '+p.latestVersion+' — your verification (against '+p.version+') is stale</div>' : '') +
+    stepper(p) +
+    '<div class="content-grid single">' +
+      '<div>' + p.modules.map(m => accordionItem(key, m)).join('') + '</div>' +
+    '</div>'
+  );
+}
+function stepper(p){
+  return '<div class="stepper">' +
+    p.modules.map((m,i) => {
+      const done = m.status==='done';
+      return (
+        '<div class="step">' +
+          '<div class="step-node '+m.status+'">'+ic(done?'check':(m.status==='stale'?'alert':(m.status==='locked'?'lock':'dot')))+'</div>' +
+          '<div class="step-label"><b>'+m.title+'</b>'+m.stage+'</div>' +
+        '</div>' +
+        (i < p.modules.length-1 ? '<div class="step-line '+(done?'done':'')+'"></div>' : '')
+      );
+    }).join('') +
+  '</div>';
+}
+function accordionItem(pathKey, m){
+  const locked = m.status==='locked';
+  return (
+    '<div class="accordion-item">' +
+      '<button class="accordion-head" onclick="toggleAccordion(this)" '+(locked?'disabled':'')+'>' +
+        ic(locked?'lock':(m.status==='done'?'check':'dot')) +
+        '<span class="title">'+m.title+'</span>' +
+        statusChip(m.status) +
+      '</button>' +
+      '<div class="accordion-body hidden">' +
+        (m.core ? '<div class="core-rule">'+m.core+'</div>' : '') +
+        '<div class="why-visible">'+ (m.core ? '' : m.body.split('.')[0]+'.') +'</div>' +
+        (m.core ? '<button class="why-toggle" onclick="toggleWhy(this)">Why this matters '+ic('arrowRight')+'</button><div class="why-body hidden">'+m.body+(m.source?'<div class="mono" style="margin-top:8px;font-size:11px;color:var(--ink-faint);">source: '+m.source+'</div>':'')+'</div>' : '<div class="why-body">'+m.body+'</div>') +
+        (m.id==='checkpoint' && !locked ? '<div style="margin-top:14px;"><button class="btn primary" onclick="navigate(\'l-checkpoint\',\''+pathKey+'\')">Open checkpoint '+ic('arrowRight')+'</button></div>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+function toggleAccordion(btn){
+  const body = btn.nextElementSibling;
+  body.classList.toggle('hidden');
+}
+function toggleWhy(btn){
+  btn.nextElementSibling.classList.toggle('hidden');
+}
+
+/* ============ LEARNER: CHECKPOINT ============ */
+function screenLearnerCheckpoint(key){
+  const p = paths[key];
+  const disabled = state.submitted;
+  return (
+    '<div class="eyebrow">Checkpoint · '+p.name+'</div>' +
+    '<h1 class="page-title">Review this PR diff</h1>' +
+    '<p class="page-sub">Flag every statement below that describes a real violation of the standard. Select exactly the violations — nothing more, nothing less.</p>' +
+    '<div class="terminal" style="margin:20px 0;">' +
+      '<div class="terminal-bar"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-file">orders.controller.ts</span></div>' +
+      '<div class="terminal-body">' +
+'<span class="ln">1</span>@Controller(\'orders\')\n' +
+'<span class="ln">2</span>export class OrdersController {\n' +
+'<span class="ln">3</span>  @Get()\n' +
+'<span class="ln">4</span>  @Throttle({ limit: 10, ttl: 60 })\n' +
+'<span class="ln">5</span>  async list() {\n' +
+'<span class="ln">6</span>    return this.orders.find(); // no page/limit\n' +
+'<span class="ln">7</span>  }\n' +
+'<span class="ln">8</span>\n' +
+'<span class="ln">9</span>  @Post()\n' +
+'<span class="ln">10</span>  async create(@Body() dto: CreateOrderDto) {\n' +
+'<span class="ln">11</span>    try {\n' +
+'<span class="ln">12</span>      return await this.payments.charge(dto);\n' +
+'<span class="ln">13</span>    } catch (e) {\n' +
+'<span class="ln">14</span>      return this.retry(dto, 5); // immediate retry x5\n' +
+'<span class="ln">15</span>    }\n' +
+'<span class="ln">16</span>  }\n' +
+'<span class="ln">17</span>}' +
+      '</div>' +
+    '</div>' +
+    '<div>' + checkpointStatements.map(s => statementItem(s, disabled)).join('') + '</div>' +
+    (disabled ? resultBanner() : '<button class="btn primary" style="margin-top:8px;" onclick="submitCheckpoint(\''+key+'\')" '+(state.selected.size===0?'disabled':'')+'>Submit review '+ic('arrowRight')+'</button>') +
+    (disabled ? '<div style="margin-top:16px;display:flex;gap:10px;"><button class="btn" onclick="retryCheckpoint(\''+key+'\')">Try again</button><button class="btn ghost" onclick="navigate(\'l-path\',\''+key+'\')">Back to path</button></div>' : '')
+  );
+}
+function statementItem(s, disabled){
+  const checked = state.selected.has(s.id);
+  let cls = '';
+  if(disabled){
+    const correct = checked === s.violation;
+    cls = correct ? 'correct' : 'incorrect';
+  } else if(checked){ cls = 'flagged'; }
+  const hintShown = state.hintsShown.has(s.id);
+  return (
+    '<div class="statement '+cls+'">' +
+      '<input type="checkbox" '+(checked?'checked':'')+' '+(disabled?'disabled':'')+' onchange="toggleStatement('+s.id+')">' +
+      '<div class="text">' +
+        s.text +
+        (!disabled && s.hint ? '<div><button class="hint-btn" onclick="showHint('+s.id+')">'+(hintShown?'':'Stuck? Show a hint')+'</button>'+(hintShown?'<div class="hint">'+s.hint+'</div>':'')+'</div>' : '') +
+        (disabled ? '<div class="why">'+ (checked === s.violation ? ic('check') : ic('x')) +' '+s.why+'</div>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+function toggleStatement(id){
+  if(state.selected.has(id)) state.selected.delete(id); else state.selected.add(id);
+  render();
+}
+function showHint(id){ state.hintsShown.add(id); render(); }
+function submitCheckpoint(pathKey){
+  state.submitted = true;
+  const violations = new Set(checkpointStatements.filter(s=>s.violation).map(s=>s.id));
+  const pass = violations.size === state.selected.size && [...violations].every(id => state.selected.has(id));
+  state.lastPass = pass;
+  const jordan = devs.find(d=>d.name==='Jordan Blake');
+  const p = paths[pathKey];
+  if(pass){
+    p.modules.forEach(m => m.status = 'done');
+    jordan[pathKey] = 'done';
+    pushActivity('Jordan Blake', 'passed the checkpoint on <b>'+p.name+'</b>', 'check', 'green');
+  } else {
+    pushActivity('Jordan Blake', 'submitted a checkpoint attempt on <b>'+p.name+'</b> — not yet passing', 'alert', 'amber');
+  }
+  render();
+}
+function retryCheckpoint(pathKey){
+  state.submitted = false;
+  state.selected = new Set();
+  state.hintsShown = new Set();
+  render();
+}
+function resultBanner(){
+  return state.lastPass
+    ? '<div class="chip green" style="font-size:13px;padding:8px 14px;">'+ic('check')+'Passed — this path is now verified.</div>'
+    : '<div class="chip red" style="font-size:13px;padding:8px 14px;">'+ic('x')+'Not yet — review the feedback below and try again.</div>';
+}
+
+/* ============ TECH LEAD ============ */
+function screenLead(){
+  const pathKeys = Object.keys(paths);
+  let done=0, pending=0, stale=0, notStarted=0, total=0;
+  devs.forEach(d => pathKeys.forEach(k => {
+    total++;
+    const s = effectiveDevStatus(d,k);
+    if(s==='done') done++; else if(s==='pending') pending++; else if(s==='stale') stale++; else notStarted++;
+  }));
+  const readiness = Math.round((done/total)*100);
+  return (
+    '<div class="eyebrow">Tech Lead</div>' +
+    '<h1 class="page-title">Team Readiness</h1>' +
+    '<p class="page-sub">Who is actually safe to staff, and against which version of the standard.</p>' +
+    '<div class="kpi-row" style="margin-top:20px;">' +
+      kpi(readiness+'%','Team readiness') + kpi(done,'Verified') + kpi(stale,'Stale') + kpi(pending+notStarted,'Not yet ready') +
+    '</div>' +
+    '<div class="content-grid">' +
+      '<div class="panel raised" style="padding:18px 20px;">' +
+        '<div class="matrix-controls"><input class="search-input" id="lead-search" placeholder="Filter by developer name…" oninput="renderLeadMatrix()"></div>' +
+        '<div id="lead-matrix"></div>' +
+      '</div>' +
+      activityRailHTML() +
+    '</div>'
+  );
+}
+function kpi(num,lbl){ return '<div class="panel kpi"><div class="num">'+num+'</div><div class="lbl">'+lbl+'</div></div>'; }
+function renderLeadMatrix(){
+  const host = document.getElementById('lead-matrix');
+  if(!host) return;
+  const q = (document.getElementById('lead-search')||{}).value || '';
+  const filtered = devs.filter(d => d.name.toLowerCase().includes(q.toLowerCase()));
+  const pathKeys = Object.keys(paths);
+  host.innerHTML =
+    '<table class="matrix"><thead><tr><th>Developer</th>' + pathKeys.map(k=>'<th>'+paths[k].name+'</th>').join('') + '</tr></thead><tbody>' +
+    filtered.map(d =>
+      '<tr><td class="dev-name">'+avatar(d.name,'sm')+d.name+'</td>' +
+      pathKeys.map(k => {
+        const status = effectiveDevStatus(d,k);
+        const isStale = status==='stale';
+        return '<td class="cell-status '+(isStale?'stale-td':'')+'" onclick="openLeadDrawer(\''+d.name+'\',\''+k+'\')">'+statusChip(status)+'</td>';
+      }).join('') +
+      '</tr>'
+    ).join('') +
+    '</tbody></table>';
+}
+
+/* ============ PLATFORM LEAD ============ */
+function screenPlatform(){
+  const pathKeys = Object.keys(paths);
+  const upToDate = pathKeys.filter(k=>paths[k].version===paths[k].latestVersion).length;
+  return (
+    '<div class="eyebrow">Platform Lead</div>' +
+    '<h1 class="page-title">Standards</h1>' +
+    '<p class="page-sub">Publish updates deliberately — every publish shows exactly who it will flag stale before it commits.</p>' +
+    '<div class="kpi-row" style="margin-top:20px;">' +
+      kpi(pathKeys.length,'Standards') + kpi(upToDate,'Up to date') + kpi(changelog.length,'Publishes logged') + kpi(changelog.reduce((a,c)=>a+c.affected,0),'Verifications flagged (total)') +
+    '</div>' +
+    '<div class="content-grid">' +
+      '<div>' +
+        '<div class="standards-grid">' +
+          pathKeys.map(k => {
+            const p = paths[k];
+            return '<div class="panel raised standard-card">' +
+              '<div class="info"><div class="name">'+p.name+'</div><div class="ref mono">'+p.sopRef+'</div><div class="ver">current '+p.version+ (p.version!==p.latestVersion?' · latest '+p.latestVersion:'') +'</div></div>' +
+              '<button class="btn primary" onclick="openPublishDrawer(\''+k+'\')">Publish update</button>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<div class="panel" style="margin-top:20px;padding:18px 20px;">' +
+          '<div class="rail-title" style="margin-bottom:6px;">Changelog</div>' +
+          changelog.map(c => '<div class="changelog-item"><div class="top"><span>'+paths[c.pathKey].name+' · '+c.version+'</span><span>'+c.date+'</span></div><div class="notes">'+c.notes+' <span class="chip amber" style="margin-left:6px;">'+c.affected+' flagged</span></div></div>').join('') +
+        '</div>' +
+      '</div>' +
+      activityRailHTML() +
+    '</div>'
+  );
+}
+
+/* ============ DRAWER ============ */
+function openLeadDrawer(devName, pathKey){
+  state.drawer = { type:'lead-cell', dev:devName, pathKey };
+  renderDrawer();
+}
+function openPublishDrawer(pathKey){
+  state.drawer = { type:'platform-publish', pathKey };
+  renderDrawer();
+}
+function closeDrawer(){ state.drawer = null; renderDrawer(); }
+function renderDrawer(){
+  const overlay = document.getElementById('drawer-overlay');
+  const paletteOpen = !document.getElementById('palette-overlay').classList.contains('hidden');
+  if(!state.drawer){ overlay.classList.add('hidden'); overlay.innerHTML=''; return; }
+  if(paletteOpen) closePalette();
+  overlay.classList.remove('hidden');
+  if(state.drawer.type === 'lead-cell'){
+    const { dev, pathKey } = state.drawer;
+    const devObj = devs.find(d=>d.name===dev);
+    const status = effectiveDevStatus(devObj, pathKey);
+    const key = dev+'|'+pathKey;
+    const ov = overrides[key];
+    overlay.innerHTML =
+      '<div class="drawer" style="position:relative;">' +
+        '<button class="drawer-close" onclick="closeDrawer()">'+ic('x')+'</button>' +
+        '<div style="display:flex;align-items:center;gap:10px;">'+avatar(dev,'lg')+'<div><h3>'+dev+'</h3><div class="mono" style="font-size:12px;color:var(--dark-text-soft);">'+paths[pathKey].name+'</div></div></div>' +
+        '<div style="margin-top:16px;">'+statusChip(status)+(ov?' <span class="chip accent" style="margin-left:6px;">override by '+ov.by+'</span>':'')+'</div>' +
+        '<label>History</label>' +
+        '<div class="history-item">Verified against '+paths[pathKey].version+(status==='stale'?' — now stale after publish':'')+'</div>' +
+        (ov ? '<div class="history-item">Override note: "'+ov.note+'" — '+ov.by+'</div>' : '') +
+        '<label>Override this status</label>' +
+        '<textarea id="override-note" placeholder="Why is this developer safe to staff despite the current status?"></textarea>' +
+        '<button class="btn dark" style="margin-top:10px;" onclick="applyOverride(\''+dev+'\',\''+pathKey+'\')">Apply override</button>' +
+        '<button class="btn" style="margin-top:20px;width:100%;justify-content:center;" onclick="assignToProject(\''+dev+'\',\''+pathKey+'\')">Assign to project</button>' +
+      '</div>';
+  } else if(state.drawer.type === 'platform-publish'){
+    const { pathKey } = state.drawer;
+    const p = paths[pathKey];
+    const affected = devs.filter(d => d[pathKey]==='done');
+    overlay.innerHTML =
+      '<div class="drawer" style="position:relative;">' +
+        '<button class="drawer-close" onclick="closeDrawer()">'+ic('x')+'</button>' +
+        '<h3>Publish update</h3>' +
+        '<div class="mono" style="font-size:12px;color:var(--dark-text-soft);">'+p.name+' · currently '+p.version+'</div>' +
+        '<label>New version</label>' +
+        '<input type="text" id="publish-version" value="'+nextVersion(p.version)+'">' +
+        '<label>Changelog notes</label>' +
+        '<textarea id="publish-notes" placeholder="What changed and why?"></textarea>' +
+        '<div class="impact-list">' +
+          '<div class="mono" style="font-size:11px;color:var(--dark-text-soft);text-transform:uppercase;letter-spacing:.06em;">Impact preview</div>' +
+          (affected.length===0
+            ? '<div style="font-size:12.5px;margin-top:6px;color:var(--dark-text-soft);">No one is currently verified on this path — publishing has no impact.</div>'
+            : affected.map(d=>'<div class="who">'+avatar(d.name,'sm')+d.name+'<span class="mono" style="margin-left:auto;font-size:11px;color:var(--dark-text-soft);">will go stale</span></div>').join('')) +
+        '</div>' +
+        '<button class="btn primary" style="margin-top:16px;width:100%;justify-content:center;" onclick="publishStandard(\''+pathKey+'\')">Publish anyway</button>' +
+      '</div>';
+  }
+}
+function nextVersion(v){
+  const m = v.match(/v(\d+)\.(\d+)/);
+  if(!m) return v;
+  return 'v'+m[1]+'.'+(parseInt(m[2],10)+1);
+}
+function applyOverride(devName, pathKey){
+  const note = (document.getElementById('override-note')||{}).value || '(no note provided)';
+  overrides[devName+'|'+pathKey] = { note, by:'Dee Fernandes' };
+  pushActivity('Dee Fernandes', 'overrode '+devName+' on <b>'+paths[pathKey].name+'</b>', 'info', 'amber');
+  closeDrawer();
+  render();
+}
+function assignToProject(devName, pathKey){
+  pushActivity('Dee Fernandes', 'assigned '+devName+' using their <b>'+paths[pathKey].name+'</b> status', 'layers', 'accent');
+  closeDrawer();
+}
+function publishStandard(pathKey){
+  const p = paths[pathKey];
+  const version = (document.getElementById('publish-version')||{}).value || nextVersion(p.version);
+  const notes = (document.getElementById('publish-notes')||{}).value || 'No notes provided.';
+  const affected = devs.filter(d => d[pathKey]==='done');
+  affected.forEach(d => { d[pathKey] = 'stale'; });
+  Object.keys(overrides).forEach(k => { if(k.endsWith('|'+pathKey)) delete overrides[k]; });
+  p.version = version;
+  p.latestVersion = version;
+  if(state.role==='learner' && state.activePathKey===pathKey){
+    p.modules.forEach(m => { if(m.status==='done') m.status='stale'; });
+  } else {
+    p.modules.forEach(m => { if(m.status==='done') m.status='stale'; });
+  }
+  changelog.unshift({ pathKey, version, date:'Aug 27, 2026', notes, affected: affected.length });
+  pushActivity('Rae Chen', 'published <b>'+p.name+' '+version+'</b> — '+affected.length+' verification(s) flagged stale', 'layers', affected.length ? 'red' : 'accent');
+  closeDrawer();
+  render();
+}
+
+/* ============ COMMAND PALETTE ============ */
+function openPalette(){
+  if(state.drawer){ closeDrawer(); }
+  document.getElementById('palette-overlay').classList.remove('hidden');
+  const input = document.getElementById('palette-input');
+  input.value = '';
+  renderPaletteResults();
+  setTimeout(()=>input.focus(), 0);
+}
+function closePalette(){ document.getElementById('palette-overlay').classList.add('hidden'); }
+function renderPaletteResults(){
+  const q = (document.getElementById('palette-input').value || '').toLowerCase();
+  const results = [];
+  Object.keys(paths).forEach(k => { if(paths[k].name.toLowerCase().includes(q)) results.push({label:paths[k].name, kind:'Path', action:"switchRole('learner');navigate('l-path','"+k+"')"}); });
+  devs.forEach(d => { if(d.name.toLowerCase().includes(q)) results.push({label:d.name, kind:'Developer', action:"switchRole('lead')"}); });
+  Object.keys(paths).forEach(k => { if(paths[k].sopRef.toLowerCase().includes(q)) results.push({label:paths[k].sopRef, kind:'Standard', action:"switchRole('platform')"}); });
+  const host = document.getElementById('palette-results');
+  host.innerHTML = results.length ? results.map(r => '<div class="palette-result" onclick="'+r.action+';closePalette()">'+ic('search')+'<span>'+r.label+'</span><span class="kind">'+r.kind+'</span></div>').join('') : '<div class="palette-result" style="color:var(--ink-faint);">No matches</div>';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
+    e.preventDefault(); openPalette();
+  } else if(e.key === 'Escape'){
+    closePalette(); closeDrawer();
+  }
+});
+document.getElementById('palette-overlay').addEventListener('click', e => { if(e.target.id==='palette-overlay') closePalette(); });
+document.getElementById('drawer-overlay').addEventListener('click', e => { if(e.target.id==='drawer-overlay') closeDrawer(); });
+
+/* ============ INIT ============ */
+render();
+</script>
+</body>
+</html>
